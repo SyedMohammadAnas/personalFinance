@@ -166,6 +166,21 @@ export async function POST(request: Request) {
     const userEmail = session.user.email;
     console.log(`Processing emails for user: ${userEmail}`);
 
+    // Check if test mode is enabled
+    let params;
+    try {
+      params = await request.json();
+    } catch (e) {
+      params = {};
+    }
+
+    const testMode = params.testMode === true;
+
+    if (testMode) {
+      console.log("🧪 TEST MODE ENABLED - Generating test transaction data");
+      return await generateTestTransactions(userEmail);
+    }
+
     // Trigger email processing specifically for this user
     try {
       const response = await fetch(new URL('/api/emails/process', request.url), {
@@ -211,6 +226,96 @@ export async function POST(request: Request) {
         error: 'Internal server error',
         message: error instanceof Error ? error.message : 'Unknown error'
       },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * Generate test transaction data for development and testing
+ */
+async function generateTestTransactions(userEmail: string): Promise<Response> {
+  try {
+    // Import transaction table functions
+    const { ensureUserTransactionsTable, getTransactionsTableNameFromEmail } = await import('@/lib/email-processor');
+    const { createClient } = await import('@supabase/supabase-js');
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+    // Ensure transactions table exists
+    await ensureUserTransactionsTable(userEmail);
+
+    // Get table name
+    const tableName = getTransactionsTableNameFromEmail(userEmail);
+
+    // Create Supabase client
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    // Generate some test transactions
+    const testTransactions = [
+      {
+        email_id: `test-credit-${Date.now()}-1`,
+        amount: 2500,
+        name: 'Test Salary Payment',
+        date: new Date().toISOString().split('T')[0],
+        time: '10:30:00',
+        type: 'credit',
+        bank_name: 'Test Bank',
+        category: 'Income',
+        raw_email: `test-email-${Date.now()}-1`,
+        processed: true
+      },
+      {
+        email_id: `test-debit-${Date.now()}-1`,
+        amount: 499.99,
+        name: 'Test Shopping',
+        date: new Date().toISOString().split('T')[0],
+        time: '15:45:00',
+        type: 'debit',
+        bank_name: 'Test Bank',
+        category: 'Shopping',
+        raw_email: `test-email-${Date.now()}-2`,
+        processed: true
+      },
+      {
+        email_id: `test-debit-${Date.now()}-2`,
+        amount: 1200,
+        name: 'Test Rent Payment',
+        date: new Date(Date.now() - 86400000).toISOString().split('T')[0], // Yesterday
+        time: '09:15:00',
+        type: 'debit',
+        bank_name: 'Test Bank',
+        category: 'Housing',
+        raw_email: `test-email-${Date.now()}-3`,
+        processed: true
+      }
+    ];
+
+    console.log(`Inserting ${testTransactions.length} test transactions into ${tableName}`);
+
+    // Insert test transactions
+    const { error } = await supabase
+      .from(tableName)
+      .insert(testTransactions);
+
+    if (error) {
+      console.error('Error inserting test transactions:', error);
+      return NextResponse.json(
+        { error: 'Failed to insert test transactions', details: error },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `Generated ${testTransactions.length} test transactions`,
+      testMode: true
+    });
+  } catch (error) {
+    console.error('Error generating test transactions:', error);
+    return NextResponse.json(
+      { error: 'Failed to generate test transactions', details: error },
       { status: 500 }
     );
   }

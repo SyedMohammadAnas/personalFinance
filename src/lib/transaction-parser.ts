@@ -152,6 +152,19 @@ export async function parseTransactionEmail(email: EmailData): Promise<Transacti
 function parseGenericIndianBankEmail(email: EmailData): any {
   const emailContent = email.body || email.rawContent || '';
 
+  console.log('========= PARSING EMAIL CONTENT =========');
+  console.log('Email ID:', email.id);
+  console.log('From:', email.from);
+  console.log('Subject:', email.subject);
+  console.log('Date:', email.date);
+  console.log('Content preview (first 200 chars):', emailContent.substring(0, 200));
+
+  // If content is empty, return null
+  if (!emailContent) {
+    console.log('⚠️ Email content is empty - cannot parse');
+    return null;
+  }
+
   /**
    * Main parsing function using the provided code
    */
@@ -180,50 +193,81 @@ function parseGenericIndianBankEmail(email: EmailData): any {
     const emailMatch = emailContent.match(/to me\s+<([^>]+)>/i);
     if(emailMatch) {
         parsedData.emailId = emailMatch[1];
+        console.log('✅ Found email ID:', parsedData.emailId);
+    } else {
+        console.log('❌ Could not find email ID pattern');
     }
 
     // Extracting time
     const timeMatch = emailContent.match(/at (\d{1,2}:\d{2}:\d{2})/);
     if(timeMatch) {
         parsedData.time = timeMatch[1];
+        console.log('✅ Found time:', parsedData.time);
+    } else {
+        console.log('❌ Could not find time pattern');
     }
 
     // Extracting date
     const dateMatch = emailContent.match(/on (\d{2}-[A-Z]{3}-\d{4})/);
     if(dateMatch) {
         parsedData.date = dateMatch[1];
+        console.log('✅ Found date:', parsedData.date);
+    } else {
+        console.log('❌ Could not find date pattern');
     }
 
     // Extracting amount
     const amountMatch = emailContent.match(/(?:INR|Rs\.|₹)\s*([0-9,]+\.?\d{0,2})/);
     if(amountMatch) {
         parsedData.amount = amountMatch[1].replace(',', '');
+        console.log('✅ Found amount:', parsedData.amount);
+    } else {
+        console.log('❌ Could not find amount pattern');
     }
 
     // Identifying if money was credited or debited
     if(/\b(credited|received)\b/i.test(emailContent)) {
         parsedData.transactionType = 'Credited';
         parsedData.moneySent = 1;
+        console.log('✅ Transaction type: Credit');
 
         // Extracting sender's name if received via UPI
         const senderMatch = emailContent.match(/by\s+(.*?)\s+on/i);
         if(senderMatch) {
             parsedData.name = senderMatch[1].trim();
+            console.log('✅ Found sender name:', parsedData.name);
+        } else {
+            console.log('❌ Could not find sender name pattern');
         }
     } else if(/\b(debited|paid|withdrawal)\b/i.test(emailContent)) {
         parsedData.transactionType = 'Debited';
         parsedData.moneySent = 0;
+        console.log('✅ Transaction type: Debit');
 
         // Extracting receiver's name if money was sent via UPI
         const receiverMatch = emailContent.match(/to\s+(?:VPA.*?\s+)?([A-Z\s]+)(?=\s+on)/i);
         if(receiverMatch) {
             parsedData.name = receiverMatch[1].trim();
+            console.log('✅ Found receiver name:', parsedData.name);
+        } else {
+            console.log('❌ Could not find receiver name pattern');
         }
 
         // Handling ATM withdrawals where receiver is always the user
         if(/ATM withdrawal/i.test(emailContent)) {
             parsedData.name = 'You';
+            console.log('✅ ATM withdrawal detected, name set to "You"');
         }
+    } else {
+        console.log('❌ Could not identify transaction type (credit/debit)');
+    }
+
+    // Check if we have minimal required data
+    const hasMinimalData = !!parsedData.amount && !!parsedData.transactionType;
+    if (!hasMinimalData) {
+        console.log('⚠️ Missing critical transaction data (amount or type)');
+    } else {
+        console.log('✅ Minimal transaction data found');
     }
 
     return parsedData;
@@ -231,7 +275,14 @@ function parseGenericIndianBankEmail(email: EmailData): any {
 
   try {
     const parsedData = parseEmail(emailContent);
-    console.log('Parsed transaction data:', parsedData);
+    console.log('Parsed transaction data result:', parsedData);
+
+    // Return null if no minimal data was found
+    if (!parsedData.amount || !parsedData.transactionType) {
+      console.log('⚠️ Returning null due to missing critical data');
+      return null;
+    }
+
     return parsedData;
   } catch (error) {
     console.error('Error in generic parser:', error);

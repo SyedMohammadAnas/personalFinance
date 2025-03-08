@@ -47,10 +47,12 @@ export async function createGmailClient(accessToken: string): Promise<any> {
  */
 export async function fetchEmails(
   gmailClient: any,
-  maxResults: number = 10,
-  query: string = 'from:bank OR from:statement OR subject:transaction OR subject:statement'
+  maxResults: number = 30,
+  query: string = '(from:bank OR from:statement OR subject:transaction OR subject:statement OR subject:credited OR subject:debited OR subject:payment) -is:spam'
 ): Promise<EmailData[]> {
   try {
+    console.log(`Fetching emails with query: "${query}"`);
+
     // List messages matching the query
     const response = await gmailClient.users.messages.list({
       userId: 'me',
@@ -59,20 +61,31 @@ export async function fetchEmails(
     });
 
     const messages = response.data.messages || [];
+    console.log(`Found ${messages.length} messages matching query`);
+
+    if (messages.length === 0) {
+      console.log('No emails found matching the query. Try a different query or check account permissions.');
+    }
+
     const emails: EmailData[] = [];
 
     // Fetch full details for each message
     for (const message of messages) {
       try {
+        console.log(`Fetching details for message ${message.id}`);
         const emailData = await getEmailDetails(gmailClient, message.id);
         if (emailData) {
           emails.push(emailData);
+          console.log(`Successfully processed email: ${emailData.subject}`);
+        } else {
+          console.log(`Could not retrieve details for message ${message.id}`);
         }
       } catch (error) {
         console.error(`Error fetching email ${message.id}:`, error);
       }
     }
 
+    console.log(`Successfully retrieved ${emails.length} out of ${messages.length} emails`);
     return emails;
   } catch (error) {
     console.error('Error fetching emails:', error);
