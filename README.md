@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bank Email Transaction Tracker
 
-## Getting Started
+A Next.js application that reads bank transaction emails from users' Gmail accounts and stores the transaction data in Supabase for analysis and tracking.
 
-First, run the development server:
+## Features
+
+- Google OAuth authentication for secure access to users' Gmail accounts
+- Automatically reads bank emails for transaction data
+- Stores raw email content in user-specific Supabase tables
+- Scheduled background processing to keep transaction data up-to-date
+- (Future) Parsing of email content to extract transaction details
+
+## Tech Stack
+
+- **Next.js 14+** with App Router
+- **TypeScript**
+- **Tailwind CSS** for styling
+- **NextAuth.js** for authentication
+- **Google OAuth** for Gmail API access
+- **Supabase** for data storage
+
+## Setup Instructions
+
+### Prerequisites
+
+- Node.js (v18 or later)
+- npm or yarn
+- Supabase account
+- Google Cloud Platform account with OAuth credentials
+
+### Environment Variables
+
+Copy the `.env.example` file to `.env.local` and fill in the values:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Google OAuth Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project
+3. Enable the Gmail API
+4. Create OAuth credentials:
+   - Application type: Web application
+   - Authorized JavaScript origins: `http://localhost:3000` (dev) and your production URL
+   - Authorized redirect URIs:
+     - `http://localhost:3000/api/auth/callback/google`
+     - `http://localhost:3000/api/auth/google-token`
+     - Also add these paths for your production domain
+5. Add the Client ID and Client Secret to your `.env.local` file
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Supabase Setup
 
-## Learn More
+1. Create a new Supabase project
+2. Run the SQL from `src/lib/migrations/email-tables.sql` in the Supabase SQL editor
+3. Add your Supabase URL and anon key to `.env.local`
 
-To learn more about Next.js, take a look at the following resources:
+### Installation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Install dependencies
+npm install
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Run the development server
+npm run dev
+```
 
-## Deploy on Vercel
+## Usage
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Users sign in with Google OAuth
+2. Grant permission to read their Gmail
+3. The application will automatically start reading bank emails
+4. Transaction data will be stored in Supabase
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Background Email Processing
+
+The application includes an API endpoint for processing emails that can be triggered by:
+
+1. Vercel Cron Jobs (recommended for production)
+2. Manual API calls
+3. Client-side triggers
+
+To set up a Vercel Cron Job:
+
+```json
+{
+  "crons": [
+    {
+      "path": "/api/cron/process-emails",
+      "schedule": "0 */6 * * *"
+    }
+  ]
+}
+```
+
+## Security Considerations
+
+- All user tokens are stored securely in Supabase with Row Level Security
+- Backend API calls are protected with API keys
+- Email content is only accessed with explicit user permission
+
+## License
+
+MIT

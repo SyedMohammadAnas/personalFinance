@@ -1,100 +1,134 @@
+'use client';
+
 import Image from "next/image";
+import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const { data: session, status } = useSession();
+  const isLoading = status === "loading";
+  const isAuthenticated = status === "authenticated";
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return (
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
+      <header className="border-b border-gray-200 bg-white shadow-sm">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-lg">
+              A
+            </div>
+            <span className="text-xl font-semibold text-gray-800">AppName</span>
+          </div>
+
+          <div>
+            {isLoading ? (
+              <div className="animate-pulse w-24 h-8 bg-gray-200 rounded-md"></div>
+            ) : isAuthenticated ? (
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  {session?.user?.image ? (
+                    <Image
+                      src={session.user.image}
+                      alt="Profile picture"
+                      width={32}
+                      height={32}
+                      className="rounded-full"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-600">
+                      {session?.user?.name?.charAt(0) || 'U'}
+                    </div>
+                  )}
+                  <span className="text-sm font-medium text-gray-700 hidden md:inline">
+                    {session?.user?.name || session?.user?.email}
+                  </span>
+                </div>
+                <Button
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Sign out</span>
+                </Button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Sign in
+              </Link>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-grow container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
+            Welcome to Our App
+          </h1>
+          <p className="mt-6 text-xl text-gray-500">
+            A modern web application with Google authentication
+          </p>
+
+          {isAuthenticated ? (
+            <div className="mt-12 p-8 bg-white rounded-lg shadow-lg">
+              <h2 className="text-2xl font-bold text-gray-800">Hello, {session?.user?.name || 'User'}!</h2>
+              <p className="mt-4 text-gray-600">
+                You are now signed in with your Google account. You can access all the features of our application.
+              </p>
+              <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Link
+                  href="/profile"
+                  className="block transition-transform hover:scale-105 hover:shadow-md"
+                >
+                  <div className="p-4 bg-indigo-50 rounded-lg cursor-pointer">
+                    <h3 className="font-semibold text-indigo-700">Profile</h3>
+                    <p className="mt-2 text-sm text-gray-600">
+                      View and edit your profile information
+                    </p>
+                  </div>
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="block transition-transform hover:scale-105 hover:shadow-md"
+                >
+                  <div className="p-4 bg-indigo-50 rounded-lg cursor-pointer">
+                    <h3 className="font-semibold text-indigo-700">Dashboard</h3>
+                    <p className="mt-2 text-sm text-gray-600">
+                      Access your personalized dashboard
+                    </p>
+                  </div>
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-10">
+              <Link
+                href="/login"
+                className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+              >
+                Get started
+              </Link>
+              <p className="mt-3 text-sm text-gray-500">
+                Sign in with your Google account to get started
+              </p>
+            </div>
+          )}
         </div>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      <footer className="bg-white border-t border-gray-200">
+        <div className="container mx-auto px-4 py-8">
+          <p className="text-center text-sm text-gray-500">
+            &copy; {new Date().getFullYear()} Your Company. All rights reserved.
+          </p>
+        </div>
       </footer>
     </div>
   );

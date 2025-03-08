@@ -1,0 +1,62 @@
+# Project Description
+- Create a new supabase. table with the name of each unique mail
+- With each user email,  read their emails and read the email they get from the bank
+- Parse the mail  and get the neccessary information like, AMOUNT, NAME, DATE, TIME, TRANSACTION TYPE (like receiving or sending)
+- send all the information in the table made for each respective email
+- Get back all the information in the table and display  them  in our dashboard (We  are going to go deep in this )
+- Make a functionality so that our web app keeps reads the Emails everytime behind the screen
+
+# Tech Stack
+- Next.js (v14+): React framework for server-side rendering and routing
+- TypeScript: Static typing for JavaScript
+- Tailwind CSS: Utility-first CSS framework
+- NextAuth.js: Authentication solution for Next.js
+- Google OAuth: For user authentication
+- Supabase: For user data storage
+
+# Project Structure
+- /src/app: Main application code (Next.js App Router)
+- /src/components: Reusable UI components
+- /src/lib: Utility functions and configurations
+- /src/types: TypeScript type definitions
+- /public: Static assets
+
+# Development Guidelines
+- Follow TypeScript best practices
+- Use Tailwind CSS for styling
+- Implement responsive design
+- Follow Next.js conventions for routing and data fetching
+
+# MUST DO
+- Keep adding comments in the code so that everyone can understand whats going  on
+- Keep committing changes to my repository always
+- give a short description in the commit each time to know whats happening
+
+# Mistakes
+- Keep using the latest commands, like: npx shadcn@latest
+- Ensure auth pages (signin, error) exist in the app directory structure to match NextAuth configuration
+- Dont forget to keep adding comments in  the code
+- Dont forget to always explain in detail after every  prompt on what you did now
+
+# .cursorrules - Project Progress Tracking
+
+## Completed
+1. Set up Next.js project structure
+2. Added Shadcn UI components integration
+3. Implemented basic UI with theme support
+4. Set up NextAuth.js with Google authentication
+5. Added Supabase integration for user data
+6. Created user profile page
+7. Implemented login flow
+8. Created auth pages for sign-in and error handling
+
+## In Progress
+1. Implement Row Level Security in Supabase for user data
+2. Enhance user profile with additional data
+3. Fixing authentication callback flow
+
+## To Do
+1. Add form validation
+2. Implement settings page
+3. Add more UI components as needed
+4. Create dashboard features
