@@ -190,14 +190,34 @@ export default function TransactionsList() {
         body: JSON.stringify({ testMode: true })
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Error generating test data:', errorData);
-        throw new Error(errorData.error || 'Failed to generate test data');
+      // Get the response regardless of status to see error details
+      let result;
+      try {
+        result = await response.json();
+        console.log('API Response:', result);
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        throw new Error('Could not parse API response');
       }
 
-      const result = await response.json();
-      console.log('Test data generation result:', result);
+      // Check for API errors
+      if (!response.ok) {
+        let errorMessage = 'Failed to generate test data';
+
+        if (result && result.error) {
+          errorMessage = result.error;
+
+          // If there are more details, add them
+          if (result.details) {
+            console.error('Error details:', result.details);
+            if (result.details.message) {
+              errorMessage += `: ${result.details.message}`;
+            }
+          }
+        }
+
+        throw new Error(errorMessage);
+      }
 
       // Show success message temporarily
       setError('Test transaction data generated successfully. Fetching transactions...');

@@ -236,6 +236,8 @@ export async function POST(request: Request) {
  */
 async function generateTestTransactions(userEmail: string): Promise<Response> {
   try {
+    console.log(`Generating test transactions for user ${userEmail}`);
+
     // Import transaction table functions
     const { ensureUserTransactionsTable, getTransactionsTableNameFromEmail } = await import('@/lib/email-processor');
     const { createClient } = await import('@supabase/supabase-js');
@@ -243,19 +245,83 @@ async function generateTestTransactions(userEmail: string): Promise<Response> {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-    // Ensure transactions table exists
-    await ensureUserTransactionsTable(userEmail);
+    console.log('Checking Supabase configuration...');
+    if (!supabaseUrl || !supabaseUrl.startsWith('http')) {
+      console.error('Invalid Supabase URL:', supabaseUrl);
+      return NextResponse.json(
+        { error: 'Invalid Supabase URL configuration' },
+        { status: 500 }
+      );
+    }
 
-    // Get table name
-    const tableName = getTransactionsTableNameFromEmail(userEmail);
-
+    console.log('Creating Supabase client...');
     // Create Supabase client
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+    // Create a simpler table name to avoid potential issues
+    const tableName = `transactions_${userEmail.replace(/[^a-z0-9]/gi, '_').toLowerCase()}`;
+    console.log(`Using table name: ${tableName}`);
+
+    // Check if table exists directly
+    console.log(`Checking if table ${tableName} exists...`);
+    try {
+      const { error: tableCheckError } = await supabase
+        .from(tableName)
+        .select('id')
+        .limit(1);
+
+      if (tableCheckError) {
+        if (tableCheckError.message.includes('does not exist')) {
+          console.log(`Table ${tableName} doesn't exist, creating it...`);
+
+          // Create the table using raw SQL
+          const { error: createError } = await supabase.rpc('execute_sql', {
+            sql_string: `
+              CREATE TABLE IF NOT EXISTS "${tableName}" (
+                id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                email_id TEXT NOT NULL UNIQUE,
+                amount NUMERIC,
+                name TEXT,
+                date DATE,
+                time TEXT,
+                type TEXT,
+                bank_name TEXT,
+                category TEXT,
+                raw_email TEXT,
+                processed BOOLEAN DEFAULT true,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+              );
+            `
+          });
+
+          if (createError) {
+            console.error('Error creating table:', createError);
+            return NextResponse.json(
+              { error: 'Failed to create transactions table', details: createError },
+              { status: 500 }
+            );
+          }
+        } else {
+          console.error('Error checking table:', tableCheckError);
+        }
+      } else {
+        console.log(`Table ${tableName} exists`);
+      }
+    } catch (tableError) {
+      console.error('Exception checking/creating table:', tableError);
+      return NextResponse.json(
+        { error: 'Exception checking/creating table', details: tableError },
+        { status: 500 }
+      );
+    }
+
     // Generate some test transactions
+    // Using current timestamp to make email_id unique
+    const timestamp = Date.now();
     const testTransactions = [
       {
-        email_id: `test-credit-${Date.now()}-1`,
+        email_id: `test-credit-${timestamp}-1`,
         amount: 2500,
         name: 'Test Salary Payment',
         date: new Date().toISOString().split('T')[0],
@@ -263,11 +329,11 @@ async function generateTestTransactions(userEmail: string): Promise<Response> {
         type: 'credit',
         bank_name: 'Test Bank',
         category: 'Income',
-        raw_email: `test-email-${Date.now()}-1`,
+        raw_email: `test-email-${timestamp}-1`,
         processed: true
       },
       {
-        email_id: `test-debit-${Date.now()}-1`,
+        email_id: `test-debit-${timestamp}-1`,
         amount: 499.99,
         name: 'Test Shopping',
         date: new Date().toISOString().split('T')[0],
@@ -275,11 +341,11 @@ async function generateTestTransactions(userEmail: string): Promise<Response> {
         type: 'debit',
         bank_name: 'Test Bank',
         category: 'Shopping',
-        raw_email: `test-email-${Date.now()}-2`,
+        raw_email: `test-email-${timestamp}-2`,
         processed: true
       },
       {
-        email_id: `test-debit-${Date.now()}-2`,
+        email_id: `test-debit-${timestamp}-2`,
         amount: 1200,
         name: 'Test Rent Payment',
         date: new Date(Date.now() - 86400000).toISOString().split('T')[0], // Yesterday
@@ -287,26 +353,42 @@ async function generateTestTransactions(userEmail: string): Promise<Response> {
         type: 'debit',
         bank_name: 'Test Bank',
         category: 'Housing',
-        raw_email: `test-email-${Date.now()}-3`,
+        raw_email: `test-email-${timestamp}-3`,
         processed: true
       }
     ];
 
     console.log(`Inserting ${testTransactions.length} test transactions into ${tableName}`);
 
-    // Insert test transactions
-    const { error } = await supabase
-      .from(tableName)
-      .insert(testTransactions);
+    try {
+      // Insert test transactions one by one to better identify issues
+      for (const transaction of testTransactions) {
+        console.log(`Inserting transaction: ${transaction.email_id}`);
+        const { error: insertError } = await supabase
+          .from(tableName)
+          .insert(transaction);
 
-    if (error) {
-      console.error('Error inserting test transactions:', error);
+        if (insertError) {
+          console.error(`Error inserting transaction ${transaction.email_id}:`, insertError);
+          return NextResponse.json(
+            {
+              error: `Failed to insert test transaction ${transaction.email_id}`,
+              details: insertError
+            },
+            { status: 500 }
+          );
+        }
+        console.log(`Successfully inserted transaction: ${transaction.email_id}`);
+      }
+    } catch (insertError) {
+      console.error('Exception inserting transactions:', insertError);
       return NextResponse.json(
-        { error: 'Failed to insert test transactions', details: error },
+        { error: 'Exception inserting transactions', details: insertError },
         { status: 500 }
       );
     }
 
+    console.log('All test transactions inserted successfully');
     return NextResponse.json({
       success: true,
       message: `Generated ${testTransactions.length} test transactions`,

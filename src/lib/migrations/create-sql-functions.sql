@@ -5,7 +5,7 @@ RETURNS VOID AS $$
 BEGIN
   EXECUTE sql_string;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to create an email table for a specific user
 CREATE OR REPLACE FUNCTION create_user_email_table(user_email TEXT, table_name TEXT)
@@ -26,7 +26,7 @@ BEGIN
     );
   ', table_name);
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to create a transactions table for a specific user
 CREATE OR REPLACE FUNCTION create_user_transactions_table(user_email TEXT, table_name TEXT)
@@ -50,4 +50,4 @@ BEGIN
     );
   ', table_name);
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
