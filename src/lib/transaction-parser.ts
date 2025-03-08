@@ -35,12 +35,29 @@ export enum TransactionType {
 /**
  * Bank detector to identify which bank sent the email
  */
-export function detectBankFromEmail(email: EmailData): string | null {
+export function detectBankFromEmail(email: EmailData): string {
   const from = email.from.toLowerCase();
   const subject = email.subject.toLowerCase();
 
-  // Basic detection logic - can be expanded with more banks
-  if (from.includes('chase') || subject.includes('chase')) {
+  // Indian banks
+  if (from.includes('hdfc') || subject.includes('hdfc')) {
+    return 'hdfc';
+  } else if (from.includes('icici') || subject.includes('icici')) {
+    return 'icici';
+  } else if (from.includes('sbi') || subject.includes('sbi')) {
+    return 'sbi';
+  } else if (from.includes('axis') || subject.includes('axis')) {
+    return 'axis';
+  } else if (from.includes('kotak') || subject.includes('kotak')) {
+    return 'kotak';
+  } else if (from.includes('pnb') || subject.includes('pnb')) {
+    return 'pnb';
+  } else if (from.includes('upi') || subject.includes('upi')) {
+    return 'upi';
+  }
+
+  // US banks (keeping for reference)
+  else if (from.includes('chase') || subject.includes('chase')) {
     return 'chase';
   } else if (from.includes('wells fargo') || subject.includes('wells fargo')) {
     return 'wells_fargo';
@@ -52,8 +69,8 @@ export function detectBankFromEmail(email: EmailData): string | null {
     return 'capital_one';
   }
 
-  // No specific bank detected
-  return null;
+  // If we can't identify the bank
+  return 'generic_indian_bank';
 }
 
 /**
@@ -64,50 +81,55 @@ export async function parseTransactionEmail(email: EmailData): Promise<Transacti
     // First, detect which bank this email is from
     const bankName = detectBankFromEmail(email);
 
-    if (!bankName) {
-      console.log('Unknown bank for email:', email.id);
-      return null;
-    }
-
-    // Based on the bank, use the appropriate parser
-    let parsedData: Partial<TransactionData> | null = null;
-
-    switch (bankName) {
-      case 'chase':
-        parsedData = await parseChaseEmail(email);
-        break;
-      case 'wells_fargo':
-        parsedData = await parseWellsFargoEmail(email);
-        break;
-      case 'bofa':
-        parsedData = await parseBofAEmail(email);
-        break;
-      case 'citi':
-        parsedData = await parseCitiEmail(email);
-        break;
-      case 'capital_one':
-        parsedData = await parseCapitalOneEmail(email);
-        break;
-      default:
-        parsedData = await parseGenericBankEmail(email);
-        break;
-    }
+    // Use the generic parser for all banks
+    const parsedData = parseGenericIndianBankEmail(email);
 
     // If we couldn't parse the data, return null
     if (!parsedData) {
       return null;
     }
 
-    // Complete the transaction data with common fields
+    // Convert string amount to number
+    const amount = parsedData.amount ? parseFloat(parsedData.amount) : 0;
+
+    // Convert date string to Date object
+    let dateObj: Date;
+    try {
+      // Try to parse DD-MMM-YYYY format (e.g., 15-JAN-2023)
+      if (parsedData.date) {
+        const [day, month, year] = parsedData.date.split('-');
+        const monthMap: Record<string, number> = {
+          'JAN': 0, 'FEB': 1, 'MAR': 2, 'APR': 3, 'MAY': 4, 'JUN': 5,
+          'JUL': 6, 'AUG': 7, 'SEP': 8, 'OCT': 9, 'NOV': 10, 'DEC': 11
+        };
+        dateObj = new Date(parseInt(year), monthMap[month.toUpperCase()], parseInt(day));
+      } else {
+        // Fallback to email date
+        dateObj = new Date(email.date);
+      }
+    } catch (error) {
+      console.error('Error parsing date:', error);
+      dateObj = new Date(email.date);
+    }
+
+    // Map transactionType to our enum
+    let transactionType = TransactionType.UNKNOWN;
+    if (parsedData.transactionType.toLowerCase().includes('credit')) {
+      transactionType = TransactionType.CREDIT;
+    } else if (parsedData.transactionType.toLowerCase().includes('debit')) {
+      transactionType = TransactionType.DEBIT;
+    }
+
+    // Complete the transaction data
     return {
       id: email.id,
-      amount: parsedData.amount || 0,
+      amount: amount,
       name: parsedData.name || 'Unknown',
-      date: parsedData.date || new Date(email.date),
-      time: parsedData.time || '00:00',
-      type: parsedData.type || TransactionType.UNKNOWN,
+      date: dateObj,
+      time: parsedData.time || '00:00:00',
+      type: transactionType,
       bankName: bankName,
-      category: parsedData.category,
+      category: undefined, // We don't have category information yet
       rawEmail: email.id,
       processed: true
     };
@@ -118,86 +140,136 @@ export async function parseTransactionEmail(email: EmailData): Promise<Transacti
 }
 
 /**
+ * Generic parser for Indian bank email formats
+ * This is the main parser that handles all bank emails
+ */
+function parseGenericIndianBankEmail(email: EmailData): any {
+  const emailContent = email.body || email.rawContent || '';
+
+  /**
+   * Main parsing function using the provided code
+   */
+  function parseEmail(emailContent: string) {
+    interface ParsedData {
+        name: string;
+        transactionType: string;
+        date: string;
+        amount: string;
+        emailId: string;
+        time: string;
+        moneySent: number;
+    }
+
+    let parsedData: ParsedData = {
+        name: '',
+        transactionType: '',
+        date: '',
+        amount: '',
+        emailId: '',
+        time: '',
+        moneySent: 0
+    };
+
+    // Extracting emailId
+    const emailMatch = emailContent.match(/to me\s+<([^>]+)>/i);
+    if(emailMatch) {
+        parsedData.emailId = emailMatch[1];
+    }
+
+    // Extracting time
+    const timeMatch = emailContent.match(/at (\d{1,2}:\d{2}:\d{2})/);
+    if(timeMatch) {
+        parsedData.time = timeMatch[1];
+    }
+
+    // Extracting date
+    const dateMatch = emailContent.match(/on (\d{2}-[A-Z]{3}-\d{4})/);
+    if(dateMatch) {
+        parsedData.date = dateMatch[1];
+    }
+
+    // Extracting amount
+    const amountMatch = emailContent.match(/(?:INR|Rs\.|₹)\s*([0-9,]+\.?\d{0,2})/);
+    if(amountMatch) {
+        parsedData.amount = amountMatch[1].replace(',', '');
+    }
+
+    // Identifying if money was credited or debited
+    if(/\b(credited|received)\b/i.test(emailContent)) {
+        parsedData.transactionType = 'Credited';
+        parsedData.moneySent = 1;
+
+        // Extracting sender's name if received via UPI
+        const senderMatch = emailContent.match(/by\s+(.*?)\s+on/i);
+        if(senderMatch) {
+            parsedData.name = senderMatch[1].trim();
+        }
+    } else if(/\b(debited|paid|withdrawal)\b/i.test(emailContent)) {
+        parsedData.transactionType = 'Debited';
+        parsedData.moneySent = 0;
+
+        // Extracting receiver's name if money was sent via UPI
+        const receiverMatch = emailContent.match(/to\s+(?:VPA.*?\s+)?([A-Z\s]+)(?=\s+on)/i);
+        if(receiverMatch) {
+            parsedData.name = receiverMatch[1].trim();
+        }
+
+        // Handling ATM withdrawals where receiver is always the user
+        if(/ATM withdrawal/i.test(emailContent)) {
+            parsedData.name = 'You';
+        }
+    }
+
+    return parsedData;
+  }
+
+  try {
+    const parsedData = parseEmail(emailContent);
+    console.log('Parsed transaction data:', parsedData);
+    return parsedData;
+  } catch (error) {
+    console.error('Error in generic parser:', error);
+    return null;
+  }
+}
+
+/**
  * Placeholder for Chase bank email parsing
  * This should be implemented with specific parsing logic for Chase emails
  */
 async function parseChaseEmail(email: EmailData): Promise<Partial<TransactionData> | null> {
-  // This is a placeholder - actual implementation will come later
-  console.log('Parsing Chase email - placeholder');
-
-  // For now, return null to indicate we need custom implementation
-  return null;
+  // We'll use the generic parser for now
+  return parseGenericIndianBankEmail(email);
 }
 
 /**
  * Placeholder for Wells Fargo bank email parsing
  */
 async function parseWellsFargoEmail(email: EmailData): Promise<Partial<TransactionData> | null> {
-  // This is a placeholder
-  console.log('Parsing Wells Fargo email - placeholder');
-  return null;
+  // We'll use the generic parser for now
+  return parseGenericIndianBankEmail(email);
 }
 
 /**
  * Placeholder for Bank of America email parsing
  */
 async function parseBofAEmail(email: EmailData): Promise<Partial<TransactionData> | null> {
-  // This is a placeholder
-  console.log('Parsing Bank of America email - placeholder');
-  return null;
+  // We'll use the generic parser for now
+  return parseGenericIndianBankEmail(email);
 }
 
 /**
  * Placeholder for Citibank email parsing
  */
 async function parseCitiEmail(email: EmailData): Promise<Partial<TransactionData> | null> {
-  // This is a placeholder
-  console.log('Parsing Citibank email - placeholder');
-  return null;
+  // We'll use the generic parser for now
+  return parseGenericIndianBankEmail(email);
 }
 
 /**
  * Placeholder for Capital One email parsing
  */
 async function parseCapitalOneEmail(email: EmailData): Promise<Partial<TransactionData> | null> {
-  // This is a placeholder
-  console.log('Parsing Capital One email - placeholder');
-  return null;
-}
-
-/**
- * Generic email parser for banks that don't have specific parsing logic
- * Uses regular expressions and common patterns to extract transaction data
- */
-async function parseGenericBankEmail(email: EmailData): Promise<Partial<TransactionData> | null> {
-  // This is a placeholder for the generic parser
-  console.log('Parsing generic bank email - placeholder');
-
-  try {
-    const content = email.body || email.rawContent || '';
-
-    // Example of very basic generic parsing:
-
-    // Try to find amount patterns like $123.45
-    const amountMatch = content.match(/\$\s?(\d+(?:\.\d{2})?)/);
-    let amount = amountMatch ? parseFloat(amountMatch[1]) : null;
-
-    // Try to detect if this is a credit or debit
-    let type = TransactionType.UNKNOWN;
-    if (content.match(/deposited|received|payment received|credit|added/i)) {
-      type = TransactionType.CREDIT;
-    } else if (content.match(/withdrawn|sent|charged|debit|payment sent/i)) {
-      type = TransactionType.DEBIT;
-    }
-
-    // For now, return very basic information
-    return {
-      amount: amount || 0,
-      type: type,
-      // Other fields will be filled by the main function
-    };
-  } catch (error) {
-    console.error('Error in generic parser:', error);
-    return null;
-  }
+  // We'll use the generic parser for now
+  return parseGenericIndianBankEmail(email);
 }
