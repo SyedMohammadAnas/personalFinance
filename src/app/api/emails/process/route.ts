@@ -45,6 +45,29 @@ export async function POST(request: Request) {
     const specificEmail = params.email;
     console.log('Processing emails for', specificEmail ? `user: ${specificEmail}` : 'all users');
 
+    // First, ensure tables are created for all users
+    try {
+      console.log('Setting up tables for all users before processing emails');
+      const setupResponse = await fetch(new URL('/api/setup-user-tables', request.url), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.EMAIL_PROCESSOR_API_KEY || ''
+        }
+      });
+
+      if (!setupResponse.ok) {
+        console.warn('Table setup process encountered issues, but continuing with email processing');
+        console.error('Setup response:', await setupResponse.text());
+      } else {
+        const setupResult = await setupResponse.json();
+        console.log('Table setup completed:', setupResult);
+      }
+    } catch (setupError) {
+      console.error('Error during table setup:', setupError);
+      // Continue processing even if table setup fails
+    }
+
     try {
       // Get the Supabase client
       const supabase = getSupabaseClient();

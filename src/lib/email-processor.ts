@@ -9,6 +9,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { EmailData } from './gmail';
 import { parseTransactionEmail, TransactionData } from './transaction-parser';
+import { sanitizeEmailForTableName } from './utils';
 
 // Initialize the Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -410,14 +411,14 @@ export async function parseAndStoreTransaction(userEmail: string, email: EmailDa
  * Converts an email address to a valid table name
  */
 export function getTableNameFromEmail(email: string): string {
-  // Remove special characters and replace @ and . with underscores
-  return `email_${email.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+  // Use the utility function for consistent naming
+  return `email_${sanitizeEmailForTableName(email)}`;
 }
 
 /**
  * Converts an email address to a valid transactions table name
  */
 export function getTransactionsTableNameFromEmail(email: string): string {
-  // Remove special characters and replace @ and . with underscores
-  return `transactions_${email.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+  // Use the utility function for consistent naming
+  return `transactions_${sanitizeEmailForTableName(email)}`;
 }
