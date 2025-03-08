@@ -41,12 +41,14 @@ export default function TransactionsList() {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [noDataYet, setNoDataYet] = useState(false);
 
   // Function to fetch transactions
   const fetchTransactions = async () => {
     try {
       setLoading(true);
       setError(null);
+      setNoDataYet(false);
 
       // Make sure we have a session
       if (!session || !session.user) {
@@ -60,6 +62,8 @@ export default function TransactionsList() {
       url.searchParams.append('limit', pagination.limit.toString());
       url.searchParams.append('offset', pagination.offset.toString());
 
+      console.log('Fetching transactions from:', url.toString());
+
       // Fetch the transactions
       const response = await fetch(url, {
         method: 'GET',
@@ -68,17 +72,49 @@ export default function TransactionsList() {
         }
       });
 
+      // Check for non-2xx responses
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Error response from server:', errorData);
         throw new Error(errorData.error || 'Failed to fetch transactions');
       }
 
       const data = await response.json();
-      setTransactions(data.transactions || []);
-      setPagination(data.pagination);
+      console.log('Transactions data received:', data);
+
+      // Check if we have an error in the response even with status 200
+      if (data.error) {
+        if (data.error === 'Transaction table not found') {
+          setNoDataYet(true);
+        } else {
+          setError(data.error);
+        }
+        setTransactions([]);
+        setPagination({
+          total: 0,
+          limit: pagination.limit,
+          offset: 0,
+          hasMore: false
+        });
+      } else {
+        // Set the transactions and pagination data
+        setTransactions(data.transactions || []);
+        setPagination(data.pagination || {
+          total: 0,
+          limit: pagination.limit,
+          offset: pagination.offset,
+          hasMore: false
+        });
+
+        // Show "no data yet" message if we get an empty array
+        if (data.transactions && data.transactions.length === 0) {
+          setNoDataYet(true);
+        }
+      }
     } catch (error) {
       console.error('Error fetching transactions:', error);
       setError(error instanceof Error ? error.message : 'Unknown error');
+      setTransactions([]);
     } finally {
       setLoading(false);
     }
@@ -97,6 +133,8 @@ export default function TransactionsList() {
         return;
       }
 
+      console.log('Processing emails before fetching transactions');
+
       // Call the API to process emails
       const response = await fetch('/api/transactions/user', {
         method: 'POST',
@@ -106,9 +144,17 @@ export default function TransactionsList() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Error processing emails:', errorData);
         throw new Error(errorData.error || 'Failed to refresh transactions');
       }
+
+      const result = await response.json();
+      console.log('Email processing result:', result);
+
+      // Show success message temporarily
+      setError('Emails processed successfully. Fetching transactions...');
+      setTimeout(() => setError(null), 3000);
 
       // Fetch the transactions again
       await fetchTransactions();
@@ -189,12 +235,24 @@ export default function TransactionsList() {
           )}
 
           {error && (
-            <div className="bg-red-50 text-red-700 p-4 rounded-md mb-4">
+            <div className={`p-4 rounded-md mb-4 ${error.includes('successfully') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
               {error}
             </div>
           )}
 
-          {!loading && transactions.length === 0 && !error && (
+          {!loading && noDataYet && !error && (
+            <div className="text-center py-6 text-muted-foreground">
+              <p className="font-medium text-lg">No transactions yet</p>
+              <p className="text-sm mt-2">
+                It looks like we haven't processed any bank emails yet.
+              </p>
+              <p className="text-sm mt-1">
+                Click "Refresh" to begin processing emails for transaction data.
+              </p>
+            </div>
+          )}
+
+          {!loading && transactions.length === 0 && !noDataYet && !error && (
             <div className="text-center py-6 text-muted-foreground">
               <p>No transactions found.</p>
               <p className="text-sm mt-2">Try refreshing to check for new emails.</p>
