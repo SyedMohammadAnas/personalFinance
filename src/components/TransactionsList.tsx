@@ -166,73 +166,6 @@ export default function TransactionsList() {
     }
   };
 
-  // Function to generate test data
-  const generateTestData = async () => {
-    try {
-      setRefreshing(true);
-      setError(null);
-
-      // Make sure we have a session
-      if (!session || !session.user) {
-        setError('You must be logged in to generate test data.');
-        setRefreshing(false);
-        return;
-      }
-
-      console.log('Generating test transaction data');
-
-      // Call the API to generate test data
-      const response = await fetch('/api/transactions/user', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ testMode: true })
-      });
-
-      // Get the response regardless of status to see error details
-      let result;
-      try {
-        result = await response.json();
-        console.log('API Response:', result);
-      } catch (parseError) {
-        console.error('Error parsing response:', parseError);
-        throw new Error('Could not parse API response');
-      }
-
-      // Check for API errors
-      if (!response.ok) {
-        let errorMessage = 'Failed to generate test data';
-
-        if (result && result.error) {
-          errorMessage = result.error;
-
-          // If there are more details, add them
-          if (result.details) {
-            console.error('Error details:', result.details);
-            if (result.details.message) {
-              errorMessage += `: ${result.details.message}`;
-            }
-          }
-        }
-
-        throw new Error(errorMessage);
-      }
-
-      // Show success message temporarily
-      setError('Test transaction data generated successfully. Fetching transactions...');
-      setTimeout(() => setError(null), 3000);
-
-      // Fetch the transactions again
-      await fetchTransactions();
-    } catch (error) {
-      console.error('Error generating test data:', error);
-      setError(error instanceof Error ? error.message : 'Unknown error');
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
   // Load transactions when the component mounts
   useEffect(() => {
     if (session) {
@@ -282,23 +215,13 @@ export default function TransactionsList() {
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
             <span>Recent Transactions</span>
-            <div className="flex space-x-2">
-              <Button
-                variant="outline"
-                onClick={generateTestData}
-                disabled={refreshing}
-                size="sm"
-              >
-                Generate Test Data
-              </Button>
-              <Button
-                onClick={refreshTransactions}
-                disabled={refreshing}
-                size="sm"
-              >
-                {refreshing ? 'Refreshing...' : 'Refresh'}
-              </Button>
-            </div>
+            <Button
+              onClick={refreshTransactions}
+              disabled={refreshing}
+              size="sm"
+            >
+              {refreshing ? 'Refreshing...' : 'Refresh'}
+            </Button>
           </CardTitle>
           <CardDescription>
             Your recent financial transactions from bank emails
