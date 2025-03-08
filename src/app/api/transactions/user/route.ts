@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const limit = parseInt(url.searchParams.get('limit') || '50');
     const offset = parseInt(url.searchParams.get('offset') || '0');
-    const sort = url.searchParams.get('sort') || 'transaction_date';
+    const sort = url.searchParams.get('sort') || 'date';
     const order = url.searchParams.get('order') || 'desc';
 
     // Ensure transaction table exists

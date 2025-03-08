@@ -17,9 +17,9 @@ interface Transaction {
   email_id: string;
   amount: number;
   name: string;
-  transaction_date: string;
-  transaction_time: string;
-  transaction_type: 'credit' | 'debit' | 'unknown';
+  date: string;
+  time: string;
+  type: 'credit' | 'debit' | 'unknown';
   bank_name: string;
   category?: string;
   created_at: string;
@@ -278,9 +278,9 @@ export default function TransactionsList() {
                       className="border-b hover:bg-muted/50 transition-colors"
                     >
                       <td className="py-3 px-3">
-                        {formatDate(transaction.transaction_date)}
+                        {formatDate(transaction.date)}
                         <div className="text-xs text-muted-foreground">
-                          {transaction.transaction_time}
+                          {transaction.time}
                         </div>
                       </td>
                       <td className="py-3 px-3">
@@ -292,9 +292,9 @@ export default function TransactionsList() {
                         )}
                       </td>
                       <td className={`py-3 px-3 text-right ${
-                        transaction.transaction_type === 'credit'
+                        transaction.type === 'credit'
                           ? 'text-green-600'
-                          : transaction.transaction_type === 'debit'
+                          : transaction.type === 'debit'
                             ? 'text-red-600'
                             : ''
                       }`}>
@@ -302,15 +302,15 @@ export default function TransactionsList() {
                       </td>
                       <td className="py-3 px-3">
                         <span className={`inline-block px-2 py-1 rounded-full text-xs ${
-                          transaction.transaction_type === 'credit'
+                          transaction.type === 'credit'
                             ? 'bg-green-100 text-green-800'
-                            : transaction.transaction_type === 'debit'
+                            : transaction.type === 'debit'
                               ? 'bg-red-100 text-red-800'
                               : 'bg-gray-100 text-gray-800'
                         }`}>
-                          {transaction.transaction_type === 'credit'
+                          {transaction.type === 'credit'
                             ? 'Credit'
-                            : transaction.transaction_type === 'debit'
+                            : transaction.type === 'debit'
                               ? 'Debit'
                               : 'Unknown'}
                         </span>
