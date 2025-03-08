@@ -107,8 +107,11 @@ export async function parseTransactionEmail(email: EmailData): Promise<Transacti
         // Fallback to email date
         dateObj = new Date(email.date);
       }
+
+      // Log the date parsing
+      console.log(`Date parsed: ${parsedData.date} -> ${dateObj.toISOString()}`);
     } catch (error) {
-      console.error('Error parsing date:', error);
+      console.error('Error parsing date:', error, 'Original date string:', parsedData.date);
       dateObj = new Date(email.date);
     }
 
@@ -119,6 +122,9 @@ export async function parseTransactionEmail(email: EmailData): Promise<Transacti
     } else if (parsedData.transactionType.toLowerCase().includes('debit')) {
       transactionType = TransactionType.DEBIT;
     }
+
+    // Format the date for SQL (YYYY-MM-DD)
+    const formattedDate = dateObj.toISOString().split('T')[0];
 
     // Complete the transaction data
     return {

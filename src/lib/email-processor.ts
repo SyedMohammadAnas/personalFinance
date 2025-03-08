@@ -91,6 +91,7 @@ export async function ensureUserTransactionsTable(userEmail: string): Promise<bo
   try {
     // Sanitize email to create a valid table name
     const tableName = getTransactionsTableNameFromEmail(userEmail);
+    console.log(`Ensuring transactions table exists: ${tableName}`);
 
     // Create a new Supabase client for admin operations
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -108,6 +109,8 @@ export async function ensureUserTransactionsTable(userEmail: string): Promise<bo
 
     // If table doesn't exist, create it
     if (!data || data.length === 0) {
+      console.log(`Table ${tableName} doesn't exist, creating it now...`);
+
       // Use the REST API to create a table
       const res = await fetch(`${supabaseUrl}/rest/v1/`, {
         method: 'POST',
@@ -138,11 +141,68 @@ export async function ensureUserTransactionsTable(userEmail: string): Promise<bo
       });
 
       if (!res.ok) {
-        console.error(`Failed to create transactions table ${tableName}:`, await res.text());
-        return false;
+        const errorText = await res.text();
+        console.error(`Failed to create transactions table ${tableName}:`, errorText);
+
+        // Try to create the table with alternative column names if the problem is with the references
+        if (errorText.includes('does not exist')) {
+          console.log('Trying alternative table creation without foreign key...');
+          const altRes = await fetch(`${supabaseUrl}/rest/v1/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': supabaseAnonKey,
+              'Authorization': `Bearer ${supabaseAnonKey}`
+            },
+            body: JSON.stringify({
+              command: `
+                CREATE TABLE IF NOT EXISTS "${tableName}" (
+                  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                  email_id TEXT NOT NULL UNIQUE,
+                  amount NUMERIC,
+                  name TEXT,
+                  transaction_date DATE,
+                  transaction_time TEXT,
+                  transaction_type TEXT,
+                  bank_name TEXT,
+                  category TEXT,
+                  raw_email TEXT,
+                  processed BOOLEAN DEFAULT true,
+                  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                );
+              `
+            })
+          });
+
+          if (!altRes.ok) {
+            console.error('Alternative table creation also failed:', await altRes.text());
+            return false;
+          }
+        } else {
+          return false;
+        }
       }
 
       console.log(`Created transactions table ${tableName} for user ${userEmail}`);
+
+      // Verify the table was created correctly by checking for a single row
+      try {
+        const { error: verifyError } = await supabase
+          .from(tableName)
+          .select('id')
+          .limit(1);
+
+        if (verifyError) {
+          console.error(`Error verifying table ${tableName}:`, verifyError);
+          return false;
+        }
+      } catch (verifyError) {
+        console.error(`Exception verifying table ${tableName}:`, verifyError);
+        return false;
+      }
+    } else {
+      console.log(`Table ${tableName} already exists`);
     }
 
     return true;
@@ -236,41 +296,75 @@ export async function parseAndStoreTransaction(userEmail: string, email: EmailDa
 
     // Get the transactions table name
     const tableName = getTransactionsTableNameFromEmail(userEmail);
+    console.log(`Storing transaction in table: ${tableName}`);
+
+    // Format the date for SQL (YYYY-MM-DD)
+    const formattedDate = transactionData.date.toISOString().split('T')[0];
 
     // Create Supabase client
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     // Insert the transaction data
-    const { error } = await supabase
-      .from(tableName)
-      .insert({
+    try {
+      console.log('Inserting transaction data:', {
         email_id: email.id,
         amount: transactionData.amount,
         name: transactionData.name,
-        transaction_date: transactionData.date,
+        transaction_date: formattedDate,
         transaction_time: transactionData.time,
         transaction_type: transactionData.type,
         bank_name: transactionData.bankName,
-        category: transactionData.category || null,
-        raw_email: email.id,
-        processed: true
+        raw_email: email.id
       });
 
-    if (error) {
-      console.error(`Error storing transaction data for email ${email.id}:`, error);
+      const { error } = await supabase
+        .from(tableName)
+        .insert({
+          email_id: email.id,
+          amount: transactionData.amount,
+          name: transactionData.name,
+          transaction_date: formattedDate,
+          transaction_time: transactionData.time,
+          transaction_type: transactionData.type,
+          bank_name: transactionData.bankName,
+          category: null,
+          raw_email: email.id,
+          processed: true
+        });
+
+      if (error) {
+        console.error(`Error storing transaction data for email ${email.id}:`, error);
+
+        // If there's a schema mismatch, log more details for debugging
+        if (error.message.includes('does not exist')) {
+          // Query the actual schema to see what columns we have
+          const { data: tableInfo, error: schemaError } = await supabase
+            .rpc('get_table_definition', { p_table_name: tableName });
+
+          if (!schemaError && tableInfo) {
+            console.log(`Actual table schema for ${tableName}:`, tableInfo);
+          } else {
+            console.error('Could not get table schema:', schemaError);
+          }
+        }
+
+        return false;
+      }
+
+      console.log(`Stored transaction data for email ${email.id}`);
+
+      // Update the email record to mark it as processed
+      const emailTableName = getTableNameFromEmail(userEmail);
+      await supabase
+        .from(emailTableName)
+        .update({ processed: true })
+        .eq('email_id', email.id);
+
+      return true;
+    } catch (dbError) {
+      console.error(`Database error storing transaction:`, dbError);
       return false;
     }
-
-    console.log(`Stored transaction data for email ${email.id}`);
-
-    // Update the email record to mark it as processed
-    const emailTableName = getTableNameFromEmail(userEmail);
-    await supabase
-      .from(emailTableName)
-      .update({ processed: true })
-      .eq('email_id', email.id);
-
-    return true;
   } catch (error) {
     console.error(`Error parsing and storing transaction for ${userEmail}:`, error);
     return false;
