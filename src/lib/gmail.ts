@@ -43,15 +43,15 @@ export async function createGmailClient(accessToken: string): Promise<any> {
 
 /**
  * Retrieves a list of emails from the user's Gmail account
- * Focuses specifically on bank emails by default
+ * Focuses specifically on bank emails
  */
 export async function fetchEmails(
   gmailClient: any,
-  maxResults: number = 30,
-  query: string = '(from:bank OR from:statement OR subject:transaction OR subject:statement OR subject:credited OR subject:debited OR subject:payment) -is:spam'
+  maxResults: number = 100,
+  query: string = 'from:hdfc OR from:hdfcbank OR subject:hdfc OR subject:transaction OR subject:payment'
 ): Promise<EmailData[]> {
   try {
-    console.log(`Fetching emails with query: "${query}"`);
+    console.log(`Fetching emails with query: ${query}, max results: ${maxResults}`);
 
     // List messages matching the query
     const response = await gmailClient.users.messages.list({
@@ -61,36 +61,116 @@ export async function fetchEmails(
     });
 
     const messages = response.data.messages || [];
-    console.log(`Found ${messages.length} messages matching query`);
-
-    if (messages.length === 0) {
-      console.log('No emails found matching the query. Try a different query or check account permissions.');
-    }
+    console.log(`Found ${messages.length} email(s) matching the query`);
 
     const emails: EmailData[] = [];
 
     // Fetch full details for each message
     for (const message of messages) {
       try {
-        console.log(`Fetching details for message ${message.id}`);
         const emailData = await getEmailDetails(gmailClient, message.id);
         if (emailData) {
-          emails.push(emailData);
-          console.log(`Successfully processed email: ${emailData.subject}`);
-        } else {
-          console.log(`Could not retrieve details for message ${message.id}`);
+          // Check if this is a bank email - more specific filtering
+          if (isHdfcBankEmail(emailData)) {
+            emails.push(emailData);
+            console.log(`Added email with subject: "${emailData.subject}" from ${emailData.from}`);
+          } else {
+            console.log(`Skipped non-bank email: "${emailData.subject}"`);
+          }
         }
       } catch (error) {
         console.error(`Error fetching email ${message.id}:`, error);
       }
     }
 
-    console.log(`Successfully retrieved ${emails.length} out of ${messages.length} emails`);
+    console.log(`Successfully processed ${emails.length} HDFC bank email(s)`);
     return emails;
   } catch (error) {
     console.error('Error fetching emails:', error);
     return [];
   }
+}
+
+/**
+ * Checks if an email is a transaction-related bank email
+ */
+function isHdfcBankEmail(email: EmailData): boolean {
+  const from = email.from.toLowerCase();
+  const subject = email.subject.toLowerCase();
+  const content = email.rawContent.toLowerCase();
+
+  // Skip non-transaction and balance emails
+  if (
+    subject.includes('otp') ||
+    subject.includes('password') ||
+    subject.includes('welcome') ||
+    subject.includes('verify') ||
+    subject.includes('authentication') ||
+    subject.includes('security') ||
+    subject.includes('html') ||
+    subject.includes('balance') ||
+    subject.includes('statement') ||
+    content.includes('this is an auto generated mail') ||
+    content.includes('view this message in html') ||
+    content.includes('available balance') ||
+    content.includes('bank statement')
+  ) {
+    console.log(`Skipping non-transaction email: ${subject}`);
+    return false;
+  }
+
+  // Check if email is from HDFC Bank
+  if (from.includes('hdfc') || from.includes('hdfcbank') || from.includes('alerts@hdfcbank.net')) {
+    // Specifically check for credited transaction indicators
+    if (
+      content.includes('credited to your account') ||
+      content.includes('credited to') ||
+      content.includes('has been credited') ||
+      content.includes('successfully credited') ||
+      subject.includes('credited') ||
+      subject.includes('credit')
+    ) {
+      console.log(`Found credited transaction email: ${subject}`);
+      return true;
+    }
+
+    // Check for general transaction keywords
+    return content.includes('credited') ||
+           content.includes('debited') ||
+           content.includes('transaction') ||
+           content.includes('payment') ||
+           content.includes('upi') ||
+           content.includes('account') ||
+           subject.includes('transaction') ||
+           subject.includes('payment') ||
+           subject.includes('upi');
+  }
+
+  // Check if subject contains transaction-related terms
+  if (
+    subject.includes('transaction') ||
+    subject.includes('payment') ||
+    subject.includes('credited') ||
+    subject.includes('debited') ||
+    subject.includes('upi txn') ||
+    subject.includes('credit')
+  ) {
+    return true;
+  }
+
+  // Check content for transaction-specific phrases
+  if (
+    content.includes('rs.') ||
+    content.includes('credited to your account') ||
+    content.includes('debited from your account') ||
+    content.includes('transaction reference') ||
+    content.includes('upi transaction') ||
+    content.includes('successfully credited')
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 /**

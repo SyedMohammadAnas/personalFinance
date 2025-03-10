@@ -55,37 +55,48 @@ export default function GmailAuth() {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 border rounded-lg shadow-sm">
-      <h2 className="text-xl font-semibold">Gmail Authorization</h2>
-      <p className="text-sm text-muted-foreground">
-        To read your bank transaction emails, we need permission to access your Gmail account.
-        Your data will be kept private and secure.
-      </p>
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between items-center gap-4">
+        <div className="flex-1">
+          <h3 className="text-lg font-medium text-white mb-2">Email Integration</h3>
+          <p className="text-sm text-gray-400">
+            Connect your Gmail account to read bank transaction emails.
+            Your data will be kept private and secure.
+          </p>
+        </div>
 
-      <Button
-        onClick={authorizeGmail}
-        disabled={isAuthorizing || !session}
-        className="mt-2"
-      >
-        {isAuthorizing ? 'Authorizing...' : 'Authorize Gmail Access'}
-      </Button>
+        <div className="flex-shrink-0">
+          <Button
+            onClick={authorizeGmail}
+            disabled={isAuthorizing || !session}
+            className="whitespace-nowrap bg-gray-800 hover:bg-gray-700 text-white"
+          >
+            {isAuthorizing ? 'Authorizing...' : 'Authorize Gmail Access'}
+          </Button>
+        </div>
+      </div>
 
-      {authStatus === 'success' && (
-        <p className="text-sm text-green-600 mt-2">
-          Gmail access successfully authorized. We can now read your bank emails.
-        </p>
-      )}
+      {/* Status messages in a separate row */}
+      {(authStatus === 'success' || authStatus === 'error' || !session) && (
+        <div className="w-full">
+          {authStatus === 'success' && (
+            <p className="text-sm text-green-400">
+              Gmail access successfully authorized. We can now read your bank emails.
+            </p>
+          )}
 
-      {authStatus === 'error' && errorMessage && (
-        <p className="text-sm text-red-600 mt-2">
-          Error: {errorMessage}
-        </p>
-      )}
+          {authStatus === 'error' && errorMessage && (
+            <p className="text-sm text-red-400">
+              Error: {errorMessage}
+            </p>
+          )}
 
-      {!session && (
-        <p className="text-sm text-amber-600 mt-2">
-          Please sign in to authorize Gmail access.
-        </p>
+          {!session && (
+            <p className="text-sm text-amber-400">
+              Please sign in to authorize Gmail access.
+            </p>
+          )}
+        </div>
       )}
     </div>
   );

@@ -13,6 +13,8 @@
 - NextAuth.js: Authentication solution for Next.js
 - Google OAuth: For user authentication
 - Supabase: For user data storage
+- Radix UI: Unstyled accessible components for building UI
+- Gmail API: For reading bank transaction emails
 
 # Project Structure
 - /src/app: Main application code (Next.js App Router)
@@ -49,14 +51,18 @@
 6. Created user profile page
 7. Implemented login flow
 8. Created auth pages for sign-in and error handling
+9. Implemented transaction management system
+10. Added detailed transaction view with editing capabilities
+11. Implemented Google account unlinking functionality
+12. Added transaction deletion functionality
 
 ## In Progress
 1. Implement Row Level Security in Supabase for user data
 2. Enhance user profile with additional data
-3. Fixing authentication callback flow
+3. Improving transaction data visualization
 
 ## To Do
 1. Add form validation
-2. Implement settings page
-3. Add more UI components as needed
-4. Create dashboard features
+2. Add more UI components as needed
+3. Implement transaction categorization
+4. Add transaction filtering and search

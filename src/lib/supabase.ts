@@ -21,9 +21,6 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 // Validate environment variables
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Supabase URL or Anon Key is missing in environment variables');
-  console.error('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-  // Don't log the actual key for security reasons
-  console.error('NEXT_PUBLIC_SUPABASE_ANON_KEY present:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
 /**
@@ -31,12 +28,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
  * This ensures we create a new client for each operation
  */
 export function getSupabaseClient() {
-  // Double check URL is valid before creating client
-  if (!supabaseUrl || !supabaseUrl.startsWith('http')) {
-    console.error('Invalid Supabase URL:', supabaseUrl);
-    throw new Error('Invalid Supabase URL. Please check your environment variables.');
-  }
-
   return createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       persistSession: false, // Don't persist session in server environment
@@ -45,10 +36,7 @@ export function getSupabaseClient() {
 }
 
 // Create a single instance of the Supabase client for client components
-// Only create if we have valid URL
-export const supabase = supabaseUrl && supabaseUrl.startsWith('http')
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null; // Return null if URL is invalid
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 /**
  * User data structure
