@@ -26,7 +26,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-[#0A0F1A]/70" /> {/* Dark overlay for better readability */}
       </div>
 
-      <header className="border-b border-gray-800 bg-transparent shadow-sm relative z-10">
+      <header className="border-b border-gray-800/40 bg-[#0A0F1A]/30 backdrop-blur-md shadow-lg sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-lg">
