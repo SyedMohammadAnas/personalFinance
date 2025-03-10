@@ -150,7 +150,7 @@ export default function TransactionDetailsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogClose}>
-      <DialogContent className="sm:max-w-lg md:max-w-xl relative">
+      <DialogContent className="sm:max-w-lg md:max-w-xl relative top-1/2 -translate-y-1/2 max-h-[90vh] overflow-y-auto">
         {/* Close button positioned at the top right with more spacing */}
         <button
           onClick={handleDialogClose}
