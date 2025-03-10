@@ -370,8 +370,8 @@ export default function Dashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
+        <div className="flex items-center justify-between">
+          <div>
               <Button
                 onClick={unlinkGoogleAuth}
                 variant="destructive"
@@ -379,7 +379,7 @@ export default function Dashboard() {
               >
                 Unlink Google Account
               </Button>
-            </div>
+          </div>
             <div>
               <Button
                 onClick={() => authorizeGmail()}
@@ -387,8 +387,8 @@ export default function Dashboard() {
               >
                 Authorize Gmail Access
               </Button>
-            </div>
-          </div>
+        </div>
+      </div>
         </CardContent>
       </Card>
 
@@ -401,19 +401,19 @@ export default function Dashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
+        <div className="flex items-center justify-between">
+          <div>
               <Label htmlFor="two-factor" className="text-white">Two-Factor Authentication</Label>
               <p className="text-sm text-gray-400">
-                Add an extra layer of security to your account
-              </p>
-            </div>
-            <Switch
-              id="two-factor"
-              checked={twoFactorEnabled}
-              onCheckedChange={setTwoFactorEnabled}
-            />
+              Add an extra layer of security to your account
+            </p>
           </div>
+          <Switch
+            id="two-factor"
+            checked={twoFactorEnabled}
+            onCheckedChange={setTwoFactorEnabled}
+          />
+        </div>
 
           <div className="flex items-center justify-between">
             <div>
@@ -453,7 +453,7 @@ export default function Dashboard() {
             >
               Delete All Transactions
             </Button>
-          </div>
+      </div>
         </CardContent>
       </Card>
 

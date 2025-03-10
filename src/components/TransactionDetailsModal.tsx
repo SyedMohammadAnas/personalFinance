@@ -150,34 +150,11 @@ export default function TransactionDetailsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogClose}>
-      <DialogContent className="sm:max-w-lg md:max-w-xl relative top-1/2 -translate-y-1/2 max-h-[90vh] overflow-y-auto">
-        {/* Close button positioned at the top right with more spacing */}
-        <button
-          onClick={handleDialogClose}
-          className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-4 w-4"
-          >
-            <path d="M18 6 6 18"></path>
-            <path d="m6 6 12 12"></path>
-          </svg>
-          <span className="sr-only">Close</span>
-        </button>
-
-        <DialogHeader className="pt-2">
-          <DialogTitle className="flex flex-col items-start text-xl mb-4">
-            <span className="mb-3">Transaction Details</span>
-            <div className="flex items-center">
+      <DialogContent className="sm:max-w-lg md:max-w-xl">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="flex items-start justify-between text-xl mb-2 pr-6">
+            <span>Transaction Details</span>
+            <div className="flex items-center mr-6">
               <div className={`text-base font-medium ${
                 transaction.transaction_type === 'credited'
                   ? 'text-green-400'
@@ -199,7 +176,7 @@ export default function TransactionDetailsModal({
                 <span className="text-sm text-gray-300">{transaction.id.slice(0, 8)}...</span>
               </div>
             </div>
-
+ 
             {/* Transaction Type */}
             <div className="p-3 bg-gray-900 rounded-md border border-gray-800">
               <div className="flex items-center justify-between">
