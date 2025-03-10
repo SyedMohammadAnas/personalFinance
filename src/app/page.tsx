@@ -20,10 +20,10 @@ export default function Home() {
           alt="Water background"
           fill
           priority
-          className="object-cover"
+          className="object-cover brightness-110"
           quality={100}
         />
-        <div className="absolute inset-0 bg-[#0A0F1A]/70" /> {/* Dark overlay for better readability */}
+        <div className="absolute inset-0 bg-[#0A0F1A]/40" /> {/* Dark overlay for better readability */}
       </div>
 
       <header className="border-b border-gray-800/40 bg-[#0A0F1A]/30 backdrop-blur-md shadow-lg sticky top-0 z-10">
