@@ -206,8 +206,11 @@ export default function Dashboard() {
         return;
       }
 
+      // If no transactions are found, clear the state
       if (!allTransactions || allTransactions.length === 0) {
         console.log('No transactions found in table');
+        setLatestCredited(null);
+        setLatestDebited(null);
         return;
       }
 
@@ -224,20 +227,17 @@ export default function Dashboard() {
       if (creditedTransactions.length > 0) {
         console.log('Latest credited transaction:', creditedTransactions[0]);
         setLatestCredited(creditedTransactions[0]);
+      } else {
+        // No credited transactions found
+        setLatestCredited(null);
       }
 
       if (debitedTransactions.length > 0) {
         console.log('Latest debited transaction:', debitedTransactions[0]);
         setLatestDebited(debitedTransactions[0]);
-      }
-
-      // If no transaction of either type is found, log a warning
-      if (creditedTransactions.length === 0) {
-        console.log('No credited transactions found');
-      }
-
-      if (debitedTransactions.length === 0) {
-        console.log('No debited transactions found');
+      } else {
+        // No debited transactions found
+        setLatestDebited(null);
       }
     } catch (error) {
       console.error('Error fetching latest transactions:', error);
