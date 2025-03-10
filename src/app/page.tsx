@@ -16,7 +16,7 @@ export default function Home() {
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
         <Image
-          src="/images/water-background.jpg"
+          src="/images/water-background.jpeg"
           alt="Water background"
           fill
           priority
