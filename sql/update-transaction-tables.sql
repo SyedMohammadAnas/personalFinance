@@ -196,6 +196,7 @@ CREATE OR REPLACE FUNCTION add_missing_columns()
 RETURNS VOID AS $$
 DECLARE
     table_record RECORD;
+    column_exists BOOLEAN;
 BEGIN
     FOR table_record IN
         SELECT table_name
@@ -203,38 +204,35 @@ BEGIN
         WHERE table_schema = 'public'
         AND table_name LIKE 'transactions_%'
     LOOP
-        -- Add description column if it doesn't exist
         BEGIN
-            EXECUTE format('
-                DO $$
-                BEGIN
-                    IF NOT EXISTS (
-                        SELECT 1 FROM information_schema.columns
-                        WHERE table_schema = ''public''
-                        AND table_name = ''%I''
-                        AND column_name = ''description''
-                    ) THEN
-                        ALTER TABLE public.%I ADD COLUMN description TEXT;
-                    END IF;
-                END$$;
-            ', table_record.table_name, table_record.table_name);
+            -- Check if description column exists
+            SELECT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = 'public'
+                AND table_name = table_record.table_name
+                AND column_name = 'description'
+            ) INTO column_exists;
+
+            -- Add description column if it doesn't exist
+            IF NOT column_exists THEN
+                EXECUTE format('ALTER TABLE public.%I ADD COLUMN description TEXT', table_record.table_name);
+                RAISE NOTICE 'Added description column to table: %', table_record.table_name;
+            END IF;
+
+            -- Check if tag column exists
+            SELECT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = 'public'
+                AND table_name = table_record.table_name
+                AND column_name = 'tag'
+            ) INTO column_exists;
 
             -- Add tag column if it doesn't exist
-            EXECUTE format('
-                DO $$
-                BEGIN
-                    IF NOT EXISTS (
-                        SELECT 1 FROM information_schema.columns
-                        WHERE table_schema = ''public''
-                        AND table_name = ''%I''
-                        AND column_name = ''tag''
-                    ) THEN
-                        ALTER TABLE public.%I ADD COLUMN tag TEXT;
-                    END IF;
-                END$$;
-            ', table_record.table_name, table_record.table_name);
+            IF NOT column_exists THEN
+                EXECUTE format('ALTER TABLE public.%I ADD COLUMN tag TEXT', table_record.table_name);
+                RAISE NOTICE 'Added tag column to table: %', table_record.table_name;
+            END IF;
 
-            RAISE NOTICE 'Checked and added any missing columns for table: %', table_record.table_name;
         EXCEPTION WHEN OTHERS THEN
             RAISE NOTICE 'Error adding columns to table %: %', table_record.table_name, SQLERRM;
         END;
