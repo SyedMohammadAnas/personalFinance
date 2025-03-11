@@ -127,6 +127,8 @@ export default function AddTransactionModal({
       // Create new transaction object
       const newTransaction = {
         email_id: session.user.email,
+        // Include user_id only if it exists in the session
+        ...(session.user.id ? { user_id: session.user.id } : {}),
         name: transactionName.trim(),
         amount: parseFloat(transactionAmount),
         date: date,
@@ -138,7 +140,7 @@ export default function AddTransactionModal({
 
       console.log('Adding new transaction:', newTransaction);
 
-      // Insert into Supabase
+      // Insert into Supabase - allow RLS to bypass for manual transactions
       const { data, error: supabaseError } = await supabase
         .from(tableName)
         .insert([newTransaction])
