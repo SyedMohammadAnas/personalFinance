@@ -19,13 +19,26 @@ BEGIN
             table_record.table_name
         );
 
+        -- Also make description and tag nullable if they exist
+        BEGIN
+            EXECUTE format('
+                ALTER TABLE public.%I
+                ALTER COLUMN description DROP NOT NULL,
+                ALTER COLUMN tag DROP NOT NULL',
+                table_record.table_name
+            );
+            RAISE NOTICE 'Made description and tag nullable for table: %', table_record.table_name;
+        EXCEPTION WHEN undefined_column THEN
+            RAISE NOTICE 'Description or tag columns do not exist for table: %', table_record.table_name;
+        END;
+
         -- Update the RLS policy to account for NULL user_id
         EXECUTE format('
             DROP POLICY IF EXISTS "Users can access their own transactions" ON public.%I;
             CREATE POLICY "Users can access their own transactions"
             ON public.%I
             FOR ALL
-            USING (user_id = auth.uid() OR user_id IS NULL)',
+            USING (user_id = auth.uid()::TEXT OR user_id IS NULL)',
             table_record.table_name, table_record.table_name
         );
 
@@ -62,6 +75,8 @@ BEGIN
             date DATE NOT NULL,
             time TIME NOT NULL,
             transaction_type TEXT NOT NULL,
+            description TEXT,  -- Nullable
+            tag TEXT,  -- Nullable
             created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
 
             -- Unique constraint removed since email_id can be NULL
@@ -80,7 +95,7 @@ BEGIN
         CREATE POLICY "Users can access their own transactions"
         ON public.%I
         FOR ALL
-        USING (user_id = auth.uid() OR user_id IS NULL)', table_name);
+        USING (user_id = auth.uid()::TEXT OR user_id IS NULL)', table_name);
 
     -- Grant permissions
     EXECUTE format('GRANT ALL ON public.%I TO authenticated', table_name);
@@ -112,6 +127,8 @@ BEGIN
             date DATE NOT NULL,
             time TIME NOT NULL,
             transaction_type TEXT NOT NULL,
+            description TEXT,  -- Nullable
+            tag TEXT,  -- Nullable
             created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
 
             -- Unique constraint removed since email_id can be NULL
@@ -131,7 +148,7 @@ BEGIN
         CREATE POLICY "Users can access their own transactions"
         ON public.%I
         FOR ALL
-        USING (user_id = auth.uid() OR user_id IS NULL)',
+        USING (user_id = auth.uid()::TEXT OR user_id IS NULL)',
         table_name, table_name);
 
     -- Grant permissions
@@ -173,6 +190,59 @@ END;
 $$ LANGUAGE plpgsql;
 
 SELECT remove_email_unique_constraints();
+
+-- Add description and tag columns to tables that might not have them
+CREATE OR REPLACE FUNCTION add_missing_columns()
+RETURNS VOID AS $$
+DECLARE
+    table_record RECORD;
+BEGIN
+    FOR table_record IN
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_name LIKE 'transactions_%'
+    LOOP
+        -- Add description column if it doesn't exist
+        BEGIN
+            EXECUTE format('
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_schema = ''public''
+                        AND table_name = ''%I''
+                        AND column_name = ''description''
+                    ) THEN
+                        ALTER TABLE public.%I ADD COLUMN description TEXT;
+                    END IF;
+                END$$;
+            ', table_record.table_name, table_record.table_name);
+
+            -- Add tag column if it doesn't exist
+            EXECUTE format('
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_schema = ''public''
+                        AND table_name = ''%I''
+                        AND column_name = ''tag''
+                    ) THEN
+                        ALTER TABLE public.%I ADD COLUMN tag TEXT;
+                    END IF;
+                END$$;
+            ', table_record.table_name, table_record.table_name);
+
+            RAISE NOTICE 'Checked and added any missing columns for table: %', table_record.table_name;
+        EXCEPTION WHEN OTHERS THEN
+            RAISE NOTICE 'Error adding columns to table %: %', table_record.table_name, SQLERRM;
+        END;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT add_missing_columns();
 
 -- Message to confirm schema updates
 SELECT 'Transaction table schemas updated to allow manual entries with NULL user_id and email_id' as result;
