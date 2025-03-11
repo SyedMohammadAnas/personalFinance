@@ -22,6 +22,7 @@ interface Transaction {
   time: string;
   transaction_type: string;
   created_at: string;
+  description?: string;
 }
 
 interface TransactionDetailsModalProps {
@@ -39,15 +40,20 @@ export default function TransactionDetailsModal({
 }: TransactionDetailsModalProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState('');
+  const [isNoteEditing, setIsNoteEditing] = useState(false);
+  const [newNote, setNewNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isNoteSaving, setIsNoteSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize new name when transaction changes
+  // Initialize new name and note when transaction changes
   useEffect(() => {
     if (transaction) {
       setNewName(transaction.name);
-      // Reset editing state when transaction changes
+      setNewNote(transaction.description || '');
+      // Reset editing states when transaction changes
       setIsEditing(false);
+      setIsNoteEditing(false);
       setError(null);
     }
   }, [transaction]);
@@ -137,9 +143,56 @@ export default function TransactionDetailsModal({
     }
   };
 
+  // Handle save note button click
+  const handleSaveNote = async () => {
+    if (!transaction) return;
+
+    try {
+      setIsNoteSaving(true);
+      setError(null);
+
+      console.log(`Updating transaction ${transaction.id} with new description: "${newNote}"`);
+
+      const response = await fetch('/api/transactions/update', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          transactionId: transaction.id,
+          description: newNote.trim()
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update transaction note');
+      }
+
+      console.log(`Transaction note updated successfully:`, result);
+
+      // Exit note edit mode
+      setIsNoteEditing(false);
+
+      // Wait for a brief moment before notifying parent to ensure state updates propagate
+      setTimeout(() => {
+        // Notify parent component to refresh data
+        onTransactionUpdated();
+        console.log('Notified parent component to refresh transactions after note update');
+      }, 300);
+    } catch (err) {
+      console.error('Error updating transaction note:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update transaction note');
+    } finally {
+      setIsNoteSaving(false);
+    }
+  };
+
   // Reset state when dialog is closed
   const handleDialogClose = () => {
     setIsEditing(false);
+    setIsNoteEditing(false);
     setError(null);
     onClose();
   };
@@ -169,33 +222,6 @@ export default function TransactionDetailsModal({
 
         <div className="p-4 mt-2 space-y-6 bg-gray-900/50 rounded-lg">
           <div className="grid grid-cols-1 gap-6">
-            {/* Transaction ID */}
-            <div className="p-3 bg-gray-900 rounded-md border border-gray-800">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-400">Transaction ID:</span>
-                <span className="text-sm text-gray-300">{transaction.id.slice(0, 8)}...</span>
-              </div>
-            </div>
- 
-            {/* Transaction Type */}
-            <div className="p-3 bg-gray-900 rounded-md border border-gray-800">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-400">Type:</span>
-                <div className="flex items-center">
-                  <div className="w-7 h-7 rounded-full bg-gray-800 flex items-center justify-center mr-2">
-                    {transaction.transaction_type === 'credited' ? (
-                      <ArrowDownLeft className="h-4 w-4 text-green-400" />
-                    ) : (
-                      <ArrowUpRight className="h-4 w-4 text-red-400" />
-                    )}
-                  </div>
-                  <span className="text-sm text-gray-300 capitalize">
-                    {transaction.transaction_type}
-                  </span>
-                </div>
-              </div>
-            </div>
-
             {/* Transaction Name - Editable */}
             <div className="p-3 bg-gray-900 rounded-md border border-gray-800">
               <div className="flex items-center justify-between">
@@ -237,6 +263,68 @@ export default function TransactionDetailsModal({
                     </Button>
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Transaction ID */}
+            <div className="p-3 bg-gray-900 rounded-md border border-gray-800">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-400">Transaction ID:</span>
+                <span className="text-sm text-gray-300">{transaction.id.slice(0, 8)}...</span>
+              </div>
+            </div>
+
+            {/* Transaction Type */}
+            <div className="p-3 bg-gray-900 rounded-md border border-gray-800">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-400">Type:</span>
+                <div className="flex items-center">
+                  <div className="w-7 h-7 rounded-full bg-gray-800 flex items-center justify-center mr-2">
+                    {transaction.transaction_type === 'credited' ? (
+                      <ArrowDownLeft className="h-4 w-4 text-green-400" />
+                    ) : (
+                      <ArrowUpRight className="h-4 w-4 text-red-400" />
+                    )}
+                  </div>
+                  <span className="text-sm text-gray-300 capitalize">
+                    {transaction.transaction_type}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Transaction Note - Editable */}
+            <div className="p-3 bg-gray-900 rounded-md border border-gray-800">
+              <div className="flex flex-col">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-400">Note:</span>
+                  {isNoteEditing && (
+                    <Button
+                      size="sm"
+                      onClick={handleSaveNote}
+                      disabled={isNoteSaving}
+                      className="h-7 px-2 bg-blue-600 hover:bg-blue-700"
+                    >
+                      {isNoteSaving ? (
+                        <div className="h-3.5 w-3.5 border-2 border-t-transparent border-white rounded-full animate-spin mr-1" />
+                      ) : (
+                        <Save className="h-3.5 w-3.5" />
+                      )}
+                    </Button>
+                  )}
+                </div>
+                <div className="relative w-full">
+                  <textarea
+                    value={newNote}
+                    onChange={(e) => {
+                      setNewNote(e.target.value);
+                      if (!isNoteEditing) setIsNoteEditing(true);
+                    }}
+                    onFocus={() => setIsNoteEditing(true)}
+                    placeholder="Add a note about this transaction..."
+                    className="w-full min-h-[80px] rounded p-2 bg-gray-800 border border-gray-700 text-gray-200 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
               </div>
             </div>
 

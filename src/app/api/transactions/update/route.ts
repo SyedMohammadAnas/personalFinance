@@ -2,7 +2,7 @@
  * Transaction Update API
  *
  * This API allows updating transaction details in the user's transaction table,
- * such as renaming a transaction's name field.
+ * such as renaming a transaction's name field or updating its description.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -28,7 +28,7 @@ export async function PATCH(request: NextRequest) {
 
     // Get the transaction data from the request body
     const data = await request.json();
-    const { transactionId, name } = data;
+    const { transactionId, name, description } = data;
 
     if (!transactionId) {
       console.log('Transaction update: Transaction ID is missing');
@@ -38,10 +38,11 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    if (!name || name.trim() === '') {
-      console.log('Transaction update: Name is empty');
+    // At least one of name or description must be provided
+    if ((!name || name.trim() === '') && description === undefined) {
+      console.log('Transaction update: No valid update fields provided');
       return NextResponse.json(
-        { error: 'Name cannot be empty' },
+        { error: 'At least one valid update field is required' },
         { status: 400 }
       );
     }
@@ -50,12 +51,10 @@ export async function PATCH(request: NextRequest) {
     const safeEmail = session.user.email.toLowerCase().replace(/[@.]/g, '_');
     const tableName = `transactions_${safeEmail}`;
 
-    console.log(`Transaction update: Updating transaction ${transactionId} in table ${tableName} with name "${name}"`);
-
     // Check if transaction exists before updating
     const { data: existingTransaction, error: checkError } = await supabase
       .from(tableName)
-      .select('id, name')
+      .select('id, name, description')
       .eq('id', transactionId)
       .single();
 
@@ -75,12 +74,24 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    console.log(`Transaction update: Found transaction, current name: "${existingTransaction.name}"`);
+    console.log(`Transaction update: Found transaction, current name: "${existingTransaction.name}", description: "${existingTransaction.description || ''}"`);
 
-    // Update the transaction name
+    // Prepare update object
+    const updateData: { name?: string; description?: string } = {};
+
+    // Add fields to update object if they are provided
+    if (name !== undefined) {
+      updateData.name = name.trim();
+    }
+
+    if (description !== undefined) {
+      updateData.description = description;
+    }
+
+    // Update the transaction
     const { data: updatedTransaction, error } = await supabase
       .from(tableName)
-      .update({ name: name.trim() })
+      .update(updateData)
       .eq('id', transactionId)
       .select()
       .single();
@@ -93,7 +104,13 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    console.log(`Transaction update: Successfully updated name from "${existingTransaction.name}" to "${name.trim()}"`);
+    // Log what was updated
+    if (name !== undefined) {
+      console.log(`Transaction update: Updated name from "${existingTransaction.name}" to "${updateData.name}"`);
+    }
+    if (description !== undefined) {
+      console.log(`Transaction update: Updated description from "${existingTransaction.description || ''}" to "${updateData.description}"`);
+    }
 
     return NextResponse.json({
       success: true,
