@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import TransactionList from '@/components/TransactionList';
 import GmailAuth from '@/components/GmailAuth';
-import { HomeIcon, LayoutDashboardIcon, UserIcon, BarChartIcon, Settings, Copy, Check, Shield, Mail, RefreshCcw } from 'lucide-react';
+import { HomeIcon, LayoutDashboardIcon, UserIcon, BarChartIcon, Settings, Copy, Check, Shield, Mail, RefreshCcw, LinkBreak, Database, Trash } from 'lucide-react';
 import TransactionAnalytics from '@/components/TransactionAnalytics';
 import ProfileImage from '@/components/ProfileImage';
 import { createClient } from '@supabase/supabase-js';
@@ -138,6 +138,10 @@ export default function Dashboard() {
   const [isCopied, setIsCopied] = useState(false);
   const [latestCredited, setLatestCredited] = useState<Transaction | null>(null);
   const [latestDebited, setLatestDebited] = useState<Transaction | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [feedbackType, setFeedbackType] = useState<'success' | 'error'>('success');
+  const [isGmailAuthorized, setIsGmailAuthorized] = useState(false);
 
   // Split the effects to avoid dependency array issues
   useEffect(() => {
@@ -331,6 +335,37 @@ export default function Dashboard() {
     }
   };
 
+  // Function to update database schema for manual transactions
+  const updateSchemaForManualTransactions = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/db/update-schema', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error('Failed to update schema:', data.error);
+        setFeedbackMessage('Failed to update database schema. Please try again.');
+        setFeedbackType('error');
+      } else {
+        console.log('Schema updated successfully:', data);
+        setFeedbackMessage('Database schema updated successfully for manual transactions.');
+        setFeedbackType('success');
+      }
+    } catch (error) {
+      console.error('Error updating schema:', error);
+      setFeedbackMessage('An error occurred while updating the database schema.');
+      setFeedbackType('error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Function to delete all transactions
   const deleteAllTransactions = async () => {
     try {
@@ -363,109 +398,47 @@ export default function Dashboard() {
   };
 
   const renderAccountSettings = () => (
-    <div className="grid gap-6">
-      <div className="space-y-4">
-        <h3 className="text-xl font-medium text-white">Account Settings</h3>
-        <p className="text-sm text-gray-400">Manage your account preferences and connections</p>
-      </div>
+    <div className="mb-8 mt-4">
+      <h3 className="text-lg font-semibold mb-4">Account Settings</h3>
+      <div className="flex flex-col space-y-4">
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full md:w-auto"
+          onClick={unlinkGoogleAuth}
+          disabled={!isGmailAuthorized}
+        >
+          <LinkBreak className="mr-2 h-4 w-4" />
+          Unlink Google Account
+        </Button>
 
-      {/* Email Integration Section */}
-      <Card className="bg-[#111827] border border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-white">Email Integration</CardTitle>
-          <CardDescription className="text-gray-400">
-            Connect your Gmail account to read bank transaction emails. Your data will be kept private and secure.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-              <Button
-                onClick={unlinkGoogleAuth}
-                variant="destructive"
-                className="bg-red-600 hover:bg-red-700"
-              >
-                Unlink Google Account
-              </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full md:w-auto"
+          onClick={updateSchemaForManualTransactions}
+          disabled={isLoading}
+        >
+          <Database className="mr-2 h-4 w-4" />
+          {isLoading ? 'Updating Schema...' : 'Enable Manual Transactions'}
+        </Button>
+
+        <Button
+          variant="destructive"
+          size="sm"
+          className="w-full md:w-auto"
+          onClick={deleteAllTransactions}
+        >
+          <Trash className="mr-2 h-4 w-4" />
+          Delete All Transactions
+        </Button>
+
+        {feedbackMessage && (
+          <div className={`mt-2 p-2 rounded ${feedbackType === 'success' ? 'bg-green-800/20 text-green-400' : 'bg-red-800/20 text-red-400'}`}>
+            {feedbackMessage}
           </div>
-            <div>
-              <Button
-                onClick={() => authorizeGmail()}
-                className="bg-gray-800 hover:bg-gray-700 text-white"
-              >
-                Authorize Gmail Access
-              </Button>
-        </div>
+        )}
       </div>
-        </CardContent>
-      </Card>
-
-      {/* Account Security Section */}
-      <Card className="bg-[#111827] border border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-white">Account Security</CardTitle>
-          <CardDescription className="text-gray-400">
-            Manage your security settings
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-              <Label htmlFor="two-factor" className="text-white">Two-Factor Authentication</Label>
-              <p className="text-sm text-gray-400">
-              Add an extra layer of security to your account
-            </p>
-          </div>
-          <Switch
-            id="two-factor"
-            checked={twoFactorEnabled}
-            onCheckedChange={setTwoFactorEnabled}
-          />
-        </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="email-notifications" className="text-white">Email Notifications</Label>
-              <p className="text-sm text-gray-400">
-                Receive email notifications for account activity
-              </p>
-            </div>
-            <Switch
-              id="email-notifications"
-              checked={notificationsEnabled}
-              onCheckedChange={setNotificationsEnabled}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Data Management Section */}
-      <Card className="bg-[#111827] border border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-white">Data Management</CardTitle>
-          <CardDescription className="text-gray-400">
-            Manage your transaction data
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-400">
-                Delete all transaction data from your account. This action cannot be undone.
-              </p>
-            </div>
-            <Button
-              onClick={deleteAllTransactions}
-              variant="destructive"
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Delete All Transactions
-            </Button>
-      </div>
-        </CardContent>
-      </Card>
-
-      <Button className="w-full sm:w-auto bg-gray-800 hover:bg-gray-700 text-white">Save Settings</Button>
     </div>
   );
 
@@ -478,6 +451,24 @@ export default function Dashboard() {
       setActiveView('home');
     }
   }, []);
+
+  useEffect(() => {
+    // Check if Gmail is authorized
+    const checkGmailAuthorization = async () => {
+      try {
+        const response = await fetch('/api/gmail/check-auth');
+        const data = await response.json();
+        setIsGmailAuthorized(data.isAuthorized);
+      } catch (error) {
+        console.error('Error checking Gmail authorization:', error);
+        setIsGmailAuthorized(false);
+      }
+    };
+
+    if (status === 'authenticated') {
+      checkGmailAuthorization();
+    }
+  }, [status]);
 
   if (loading) {
     return (

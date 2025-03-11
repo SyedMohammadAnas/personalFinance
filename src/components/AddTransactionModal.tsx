@@ -124,11 +124,10 @@ export default function AddTransactionModal({
       const safeEmail = session.user.email.toLowerCase().replace(/[@.]/g, '_');
       const tableName = `transactions_${safeEmail}`;
 
-      // Create new transaction object
+      // Create new transaction object with null user_id and email_id for manual transactions
       const newTransaction = {
-        email_id: session.user.email,
-        // Include user_id only if it exists in the session
-        ...(session.user.id ? { user_id: session.user.id } : {}),
+        user_id: null, // Set to null for manual transactions
+        email_id: null, // Set to null for manual transactions
         name: transactionName.trim(),
         amount: parseFloat(transactionAmount),
         date: date,
@@ -140,7 +139,7 @@ export default function AddTransactionModal({
 
       console.log('Adding new transaction:', newTransaction);
 
-      // Insert into Supabase - allow RLS to bypass for manual transactions
+      // Insert into Supabase
       const { data, error: supabaseError } = await supabase
         .from(tableName)
         .insert([newTransaction])
