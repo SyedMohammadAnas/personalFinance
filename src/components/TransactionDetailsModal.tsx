@@ -277,11 +277,11 @@ export default function TransactionDetailsModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="p-4 mt-2 space-y-6 bg-gray-900/50 rounded-lg">
-          <div className="grid grid-cols-1 gap-6">
+        <div className="p-4 mt-2 space-y-0 bg-[#0E1525] rounded-lg">
+          <div className="flex flex-col gap-5">
             {/* Tag Dropdown - Repositioned above name field */}
-            <div className="mb-[-8px] pb-5 pl-3 z-10">
-              <div className="pt-1">
+            <div className="ml-1 px-3 py-2 z-10">
+              <div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -318,7 +318,7 @@ export default function TransactionDetailsModal({
             </div>
 
             {/* Transaction Name - Editable */}
-            <div className="p-3 bg-gray-900 rounded-md border border-gray-800">
+            <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-400">Name:</span>
                 {isEditing ? (
@@ -362,7 +362,7 @@ export default function TransactionDetailsModal({
             </div>
 
             {/* Transaction ID */}
-            <div className="p-3 bg-gray-900 rounded-md border border-gray-800">
+            <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-400">Transaction ID:</span>
                 <span className="text-sm text-gray-300">{transaction.id.slice(0, 8)}...</span>
@@ -370,7 +370,7 @@ export default function TransactionDetailsModal({
             </div>
 
             {/* Transaction Type */}
-            <div className="p-3 bg-gray-900 rounded-md border border-gray-800">
+            <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-400">Type:</span>
                 <div className="flex items-center">
@@ -389,7 +389,7 @@ export default function TransactionDetailsModal({
             </div>
 
             {/* Transaction Note - Editable */}
-            <div className="p-3 bg-gray-900 rounded-md border border-gray-800">
+            <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
               <div className="flex flex-col">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-400">Note:</span>
@@ -417,7 +417,7 @@ export default function TransactionDetailsModal({
                     }}
                     onFocus={() => setIsNoteEditing(true)}
                     placeholder="Add a note about this transaction..."
-                    className="w-full min-h-[80px] rounded p-2 bg-gray-800 border border-gray-700 text-gray-200 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full min-h-[80px] rounded p-2 bg-[#1A2333] border border-gray-700 text-gray-200 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -426,7 +426,7 @@ export default function TransactionDetailsModal({
             {/* Date and Time Group */}
             <div className="grid grid-cols-2 gap-4">
               {/* Date */}
-              <div className="p-3 bg-gray-900 rounded-md border border-gray-800">
+              <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-gray-400 mb-1">Date:</span>
                   <span className="text-sm text-gray-300">{formatDate(transaction.date)}</span>
@@ -434,7 +434,7 @@ export default function TransactionDetailsModal({
               </div>
 
               {/* Time */}
-              <div className="p-3 bg-gray-900 rounded-md border border-gray-800">
+              <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-gray-400 mb-1">Time:</span>
                   <span className="text-sm text-gray-300">{formatTime(transaction.time)}</span>
