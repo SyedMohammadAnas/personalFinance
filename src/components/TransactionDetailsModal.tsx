@@ -280,39 +280,41 @@ export default function TransactionDetailsModal({
         <div className="p-4 mt-2 space-y-6 bg-gray-900/50 rounded-lg">
           <div className="grid grid-cols-1 gap-6">
             {/* Tag Dropdown - Repositioned above name field */}
-            <div className="mb-[-24px] ml-1 z-10">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className={`h-7 px-2.5 gap-1 border-gray-700 ${selectedTag ? 'text-white' : 'text-gray-400'} hover:bg-gray-800 bg-gray-900`}
-                    disabled={isTagUpdating}
-                  >
-                    {isTagUpdating ? (
-                      <div className="h-3.5 w-3.5 border-2 border-t-transparent border-current rounded-full animate-spin mr-1" />
-                    ) : (
-                      <Tag className="h-3.5 w-3.5 mr-1" />
-                    )}
-                    {selectedTag || 'Select tag'}
-                    <ChevronsUpDown className="h-3.5 w-3.5 ml-1 opacity-50" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="bg-gray-900 border-gray-700 text-gray-200">
-                  {tagOptions.map((tag) => (
-                    <DropdownMenuItem
-                      key={tag}
-                      onClick={() => handleTagSelect(tag)}
-                      className={`flex items-center cursor-pointer hover:bg-gray-800 ${selectedTag === tag ? 'text-blue-400' : ''}`}
+            <div className="mb-[-8px] pb-5 pl-3 z-10">
+              <div className="pt-1">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`h-7 px-2.5 gap-1 border-gray-700 ${selectedTag ? 'text-white' : 'text-gray-400'} hover:bg-gray-800 bg-[#111827] shadow-sm`}
+                      disabled={isTagUpdating}
                     >
-                      {selectedTag === tag && <Check className="h-3.5 w-3.5 mr-2" />}
-                      <span className={selectedTag === tag ? 'ml-0' : 'ml-5.5'}>
-                        {tag}
-                      </span>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                      {isTagUpdating ? (
+                        <div className="h-3.5 w-3.5 border-2 border-t-transparent border-current rounded-full animate-spin mr-1" />
+                      ) : (
+                        <Tag className="h-3.5 w-3.5 mr-1" />
+                      )}
+                      {selectedTag || 'Select tag'}
+                      <ChevronsUpDown className="h-3.5 w-3.5 ml-1 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="bg-gray-900 border-gray-700 text-gray-200">
+                    {tagOptions.map((tag) => (
+                      <DropdownMenuItem
+                        key={tag}
+                        onClick={() => handleTagSelect(tag)}
+                        className={`flex items-center cursor-pointer hover:bg-gray-800 ${selectedTag === tag ? 'text-blue-400' : ''}`}
+                      >
+                        {selectedTag === tag && <Check className="h-3.5 w-3.5 mr-2" />}
+                        <span className={selectedTag === tag ? 'ml-0' : 'ml-5.5'}>
+                          {tag}
+                        </span>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
 
             {/* Transaction Name - Editable */}
