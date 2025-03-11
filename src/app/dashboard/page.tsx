@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import TransactionList from '@/components/TransactionList';
 import GmailAuth from '@/components/GmailAuth';
-import { HomeIcon, LayoutDashboardIcon, UserIcon, BarChartIcon, Settings, Copy, Check, Shield, Mail, RefreshCcw, LinkBreak, Database, Trash } from 'lucide-react';
+import { HomeIcon, LayoutDashboardIcon, UserIcon, BarChartIcon, Settings, Copy, Check, Shield, Mail, RefreshCcw } from 'lucide-react';
 import TransactionAnalytics from '@/components/TransactionAnalytics';
 import ProfileImage from '@/components/ProfileImage';
 import { createClient } from '@supabase/supabase-js';
@@ -138,10 +138,6 @@ export default function Dashboard() {
   const [isCopied, setIsCopied] = useState(false);
   const [latestCredited, setLatestCredited] = useState<Transaction | null>(null);
   const [latestDebited, setLatestDebited] = useState<Transaction | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [feedbackMessage, setFeedbackMessage] = useState('');
-  const [feedbackType, setFeedbackType] = useState<'success' | 'error'>('success');
-  const [isGmailAuthorized, setIsGmailAuthorized] = useState(false);
 
   // Split the effects to avoid dependency array issues
   useEffect(() => {
@@ -335,37 +331,6 @@ export default function Dashboard() {
     }
   };
 
-  // Function to update database schema for manual transactions
-  const updateSchemaForManualTransactions = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch('/api/db/update-schema', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        console.error('Failed to update schema:', data.error);
-        setFeedbackMessage('Failed to update database schema. Please try again.');
-        setFeedbackType('error');
-      } else {
-        console.log('Schema updated successfully:', data);
-        setFeedbackMessage('Database schema updated successfully for manual transactions.');
-        setFeedbackType('success');
-      }
-    } catch (error) {
-      console.error('Error updating schema:', error);
-      setFeedbackMessage('An error occurred while updating the database schema.');
-      setFeedbackType('error');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   // Function to delete all transactions
   const deleteAllTransactions = async () => {
     try {
@@ -398,47 +363,109 @@ export default function Dashboard() {
   };
 
   const renderAccountSettings = () => (
-    <div className="mb-8 mt-4">
-      <h3 className="text-lg font-semibold mb-4">Account Settings</h3>
-      <div className="flex flex-col space-y-4">
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full md:w-auto"
-          onClick={unlinkGoogleAuth}
-          disabled={!isGmailAuthorized}
-        >
-          <LinkBreak className="mr-2 h-4 w-4" />
-          Unlink Google Account
-        </Button>
-
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full md:w-auto"
-          onClick={updateSchemaForManualTransactions}
-          disabled={isLoading}
-        >
-          <Database className="mr-2 h-4 w-4" />
-          {isLoading ? 'Updating Schema...' : 'Enable Manual Transactions'}
-        </Button>
-
-        <Button
-          variant="destructive"
-          size="sm"
-          className="w-full md:w-auto"
-          onClick={deleteAllTransactions}
-        >
-          <Trash className="mr-2 h-4 w-4" />
-          Delete All Transactions
-        </Button>
-
-        {feedbackMessage && (
-          <div className={`mt-2 p-2 rounded ${feedbackType === 'success' ? 'bg-green-800/20 text-green-400' : 'bg-red-800/20 text-red-400'}`}>
-            {feedbackMessage}
-          </div>
-        )}
+    <div className="grid gap-6">
+      <div className="space-y-4">
+        <h3 className="text-xl font-medium text-white">Account Settings</h3>
+        <p className="text-sm text-gray-400">Manage your account preferences and connections</p>
       </div>
+
+      {/* Email Integration Section */}
+      <Card className="bg-[#111827] border border-gray-800">
+        <CardHeader>
+          <CardTitle className="text-white">Email Integration</CardTitle>
+          <CardDescription className="text-gray-400">
+            Connect your Gmail account to read bank transaction emails. Your data will be kept private and secure.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+              <Button
+                onClick={unlinkGoogleAuth}
+                variant="destructive"
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Unlink Google Account
+              </Button>
+          </div>
+            <div>
+              <Button
+                onClick={() => authorizeGmail()}
+                className="bg-gray-800 hover:bg-gray-700 text-white"
+              >
+                Authorize Gmail Access
+              </Button>
+        </div>
+      </div>
+        </CardContent>
+      </Card>
+
+      {/* Account Security Section */}
+      <Card className="bg-[#111827] border border-gray-800">
+        <CardHeader>
+          <CardTitle className="text-white">Account Security</CardTitle>
+          <CardDescription className="text-gray-400">
+            Manage your security settings
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+              <Label htmlFor="two-factor" className="text-white">Two-Factor Authentication</Label>
+              <p className="text-sm text-gray-400">
+              Add an extra layer of security to your account
+            </p>
+          </div>
+          <Switch
+            id="two-factor"
+            checked={twoFactorEnabled}
+            onCheckedChange={setTwoFactorEnabled}
+          />
+        </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="email-notifications" className="text-white">Email Notifications</Label>
+              <p className="text-sm text-gray-400">
+                Receive email notifications for account activity
+              </p>
+            </div>
+            <Switch
+              id="email-notifications"
+              checked={notificationsEnabled}
+              onCheckedChange={setNotificationsEnabled}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Data Management Section */}
+      <Card className="bg-[#111827] border border-gray-800">
+        <CardHeader>
+          <CardTitle className="text-white">Data Management</CardTitle>
+          <CardDescription className="text-gray-400">
+            Manage your transaction data
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-400">
+                Delete all transaction data from your account. This action cannot be undone.
+              </p>
+            </div>
+            <Button
+              onClick={deleteAllTransactions}
+              variant="destructive"
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete All Transactions
+            </Button>
+      </div>
+        </CardContent>
+      </Card>
+
+      <Button className="w-full sm:w-auto bg-gray-800 hover:bg-gray-700 text-white">Save Settings</Button>
     </div>
   );
 
@@ -451,24 +478,6 @@ export default function Dashboard() {
       setActiveView('home');
     }
   }, []);
-
-  useEffect(() => {
-    // Check if Gmail is authorized
-    const checkGmailAuthorization = async () => {
-      try {
-        const response = await fetch('/api/gmail/check-auth');
-        const data = await response.json();
-        setIsGmailAuthorized(data.isAuthorized);
-      } catch (error) {
-        console.error('Error checking Gmail authorization:', error);
-        setIsGmailAuthorized(false);
-      }
-    };
-
-    if (status === 'authenticated') {
-      checkGmailAuthorization();
-    }
-  }, [status]);
 
   if (loading) {
     return (
@@ -491,179 +500,254 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 bg-[#0A0F1A] min-h-screen">
-      <Card className="border border-gray-800 bg-[#0F172A] shadow-md text-white">
-        <CardContent className="p-0">
-          <div className="flex flex-col md:flex-row">
-            {/* Sidebar */}
-            <div className="w-full md:w-64 border-r border-gray-800 p-6">
-              {/* User info */}
-              <div className="flex flex-col items-center gap-3 border-b border-gray-800 pb-6">
-                <Avatar className="h-16 w-16">
-                  <AvatarImage src={session?.user?.image || ''} alt={session?.user?.name || 'User'} />
-                  <AvatarFallback className="bg-gray-700 text-lg">{session?.user?.name?.charAt(0) || 'U'}</AvatarFallback>
-                </Avatar>
-                <div className="text-center">
-                  <p className="text-lg font-medium text-white">{session?.user?.name}</p>
+    <div className="min-h-screen relative">
+      {/* Background image with overlay */}
+      <div
+        className="fixed inset-0 z-0 bg-cover bg-center"
+        style={{
+          backgroundImage: `url('/images/TopoBackground.jpg')`,
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'cover'
+        }}
+      >
+        {/* Dark overlay for better contrast */}
+        <div className="absolute inset-0 bg-black/50"></div>
+      </div>
+
+      {/* Main content with glass effect for center elements */}
+      <div className="relative z-10 h-full">
+        <div className="container mx-auto p-4">
+          {/* Main Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            {/* Side Panel */}
+            <div className="lg:col-span-3 rounded-xl overflow-hidden">
+              {/* User card with glassmorphism */}
+              <div className="bg-[#0E1525]/80 backdrop-blur-md rounded-xl p-6 shadow-xl">
+                {/* User Profile Section */}
+                <div className="flex flex-col items-center">
+                  <div className="relative">
+                    <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-teal-400 rounded-full flex items-center justify-center text-white text-xl font-bold">
+                      {session?.user?.name?.split(" ").map(name => name[0]).join("") || "U"}
+                    </div>
+                  </div>
+                  <h2 className="text-xl text-white mt-4 text-center">{session?.user?.name || "User"}</h2>
+                  <div className="mt-4 w-full">
+                    <div className="text-gray-400 text-center">
+                      {formatDate(currentTime)}
+                    </div>
+                    <div className="text-4xl font-semibold text-white text-center mt-1">
+                      {formatTime(currentTime)}
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Date and time */}
-              <div className="mt-6 border-b border-gray-800 pb-6 text-center">
-                <p className="text-base text-gray-400">{formatDate(currentTime)}</p>
-                <p className="text-3xl font-bold text-white mt-1">{formatTime(currentTime)}</p>
-              </div>
-
-              {/* Navigation Links - centered with flex */}
-              <div className="mt-8 flex flex-col items-center">
-                <nav className="space-y-3 w-full">
-                  {[
-                    { name: 'Home', icon: HomeIcon, href: '/', view: null },
-                    { name: 'Profile', icon: UserIcon, href: '#', view: 'profile' },
-                    { name: 'Dashboard', icon: LayoutDashboardIcon, href: '#', view: 'dashboard' },
-                    { name: 'Analytics', icon: BarChartIcon, href: '#', view: 'analytics' },
-                    { name: 'Settings', icon: Settings, href: '#', view: 'settings' },
-                  ].map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.view ? '#' : item.href}
-                      className={cn(
-                        'flex items-center px-3 py-2 text-gray-400 transition-all hover:text-white rounded-lg',
-                        activeView === item.view
-                          ? 'bg-gray-800 text-white'
-                          : 'hover:bg-gray-800'
-                      )}
-                      onClick={() => item.view && handleNavClick(item.view)}
-                    >
-                      <item.icon className="h-5 w-5 mr-3" />
-                      <span>{item.name}</span>
-                    </Link>
-                  ))}
-                </nav>
+                {/* Navigation */}
+                <div className="mt-8 space-y-2">
+                  <button
+                    onClick={() => handleNavClick('home')}
+                    className={`flex items-center gap-3 w-full p-2 rounded-lg transition-colors ${
+                      activeView === 'home' ? 'bg-blue-600/20 text-blue-400' : 'hover:bg-[#1C2333]/50 text-gray-300'
+                    }`}
+                  >
+                    <HomeIcon className="h-5 w-5" />
+                    <span>Home</span>
+                  </button>
+                  <button
+                    onClick={() => handleNavClick('profile')}
+                    className={`flex items-center gap-3 w-full p-2 rounded-lg transition-colors ${
+                      activeView === 'profile' ? 'bg-blue-600/20 text-blue-400' : 'hover:bg-[#1C2333]/50 text-gray-300'
+                    }`}
+                  >
+                    <UserIcon className="h-5 w-5" />
+                    <span>Profile</span>
+                  </button>
+                  <button
+                    onClick={() => handleNavClick('dashboard')}
+                    className={`flex items-center gap-3 w-full p-2 rounded-lg transition-colors ${
+                      activeView === 'dashboard' ? 'bg-blue-600/20 text-blue-400' : 'hover:bg-[#1C2333]/50 text-gray-300'
+                    }`}
+                  >
+                    <LayoutDashboardIcon className="h-5 w-5" />
+                    <span>Dashboard</span>
+                  </button>
+                  <button
+                    onClick={() => handleNavClick('analytics')}
+                    className={`flex items-center gap-3 w-full p-2 rounded-lg transition-colors ${
+                      activeView === 'analytics' ? 'bg-blue-600/20 text-blue-400' : 'hover:bg-[#1C2333]/50 text-gray-300'
+                    }`}
+                  >
+                    <BarChartIcon className="h-5 w-5" />
+                    <span>Analytics</span>
+                  </button>
+                  <button
+                    onClick={() => handleNavClick('settings')}
+                    className={`flex items-center gap-3 w-full p-2 rounded-lg transition-colors ${
+                      activeView === 'settings' ? 'bg-blue-600/20 text-blue-400' : 'hover:bg-[#1C2333]/50 text-gray-300'
+                    }`}
+                  >
+                    <Settings className="h-5 w-5" />
+                    <span>Settings</span>
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Main Content */}
-            <div className="flex-1 p-6 border-l border-gray-800">
-              {/* Dashboard View */}
-              {activeView === 'dashboard' && (
-                <>
-                  <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-                    {/* Latest Credited Transaction Card */}
-                    <LatestTransactionCard
-                      transaction={latestCredited}
-                      type="credited"
-                    />
-                    {/* Latest Debited Transaction Card */}
-                    <LatestTransactionCard
-                      transaction={latestDebited}
-                      type="debited"
-                    />
-                  </div>
-
-                  {/* Add the onTransactionsUpdated prop to TransactionList */}
-                  <div className="mt-6">
-                    <TransactionList onTransactionsUpdated={fetchLatestTransactions} />
-                  </div>
-                </>
-              )}
-
-              {/* Analytics View */}
-              {activeView === 'analytics' && (
-                <div>
-                  <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-white">Financial Analytics</h2>
-                    <p className="text-gray-400">View your transaction analytics and insights</p>
-                  </div>
-                  <TransactionAnalytics />
-                </div>
-              )}
-
-              {/* Profile View */}
-              {activeView === 'profile' && (
-                <div>
-                  <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-white">User Profile</h2>
-                    <p className="text-gray-400">Your account details and preferences</p>
-                  </div>
-
-                  <div className="grid gap-8">
-                    {/* Personal Information Card */}
-                    <Card className="bg-[#111827] border border-gray-800">
-                      <CardHeader>
-                        <CardTitle className="text-white">Personal Information</CardTitle>
-                        <CardDescription className="text-gray-400">Your account details from Google login</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                          {/* User profile image */}
-                          <div className="flex-shrink-0">
-                            <ProfileImage
-                              src={session?.user?.image}
-                              alt={session?.user?.name || 'User'}
-                              size={96}
-                            />
-                          </div>
-
-                          {/* User details */}
-                          <div className="space-y-4 flex-grow">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <label className="text-sm text-gray-400">Full Name</label>
-                                <p className="text-white font-medium">{session?.user?.name}</p>
-                              </div>
-
-                              <div>
-                                <label className="text-sm text-gray-400">Email Address</label>
-                                <p className="text-white font-medium">{session?.user?.email}</p>
-                              </div>
-                            </div>
-
-                            <div>
-                              <label className="text-sm text-gray-400">User ID</label>
-                              <div className="flex items-center space-x-2 mt-1">
-                                <code className="bg-gray-800 px-2 py-1 rounded text-xs text-gray-300 w-56 truncate">
-                                  {session?.user?.id || 'No ID available'}
-                                </code>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-8 px-2 border-gray-700 bg-gray-800 hover:bg-gray-700"
-                                  onClick={copyToClipboard}
-                                >
-                                  {isCopied ? (
-                                    <Check className="h-4 w-4 text-green-400" />
-                                  ) : (
-                                    <Copy className="h-4 w-4 text-gray-400" />
-                                  )}
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
+            {/* Main Dashboard Content */}
+            <div className="lg:col-span-9 space-y-4">
+              {/* Content based on active view */}
+              <div className="bg-[#0E1525]/70 backdrop-blur-md rounded-xl p-6 shadow-xl">
+                {activeView === 'home' && (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {/* Latest Credited Transaction */}
+                      <div className="bg-[#131b2e]/70 backdrop-blur-sm rounded-xl p-4">
+                        <div className="flex items-center mb-3">
+                          <ArrowDownCircle className="h-5 w-5 text-green-400 mr-2" />
+                          <h3 className="text-lg text-white">Latest Income</h3>
                         </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-              )}
+                        <LatestTransactionCard
+                          transaction={latestCredited}
+                          type="credited"
+                        />
+                      </div>
 
-              {/* Settings View */}
-              {activeView === 'settings' && (
-                <div>
-                  <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-white">Account Settings</h2>
-                    <p className="text-gray-400">Manage your account preferences and connections</p>
-                  </div>
+                      {/* Latest Debited Transaction */}
+                      <div className="bg-[#131b2e]/70 backdrop-blur-sm rounded-xl p-4">
+                        <div className="flex items-center mb-3">
+                          <ArrowUpCircle className="h-5 w-5 text-red-400 mr-2" />
+                          <h3 className="text-lg text-white">Latest Expense</h3>
+                        </div>
+                        <LatestTransactionCard
+                          transaction={latestDebited}
+                          type="debited"
+                        />
+                      </div>
+                    </div>
 
-                  <div className="grid gap-8">
-                    {renderAccountSettings()}
+                    {/* Recent Transactions */}
+                    <div className="mt-6">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg text-white">Recent Transactions</h3>
+                        <div className="flex items-center gap-2">
+                          <AddTransactionButton onTransactionAdded={fetchLatestTransactions} />
+                          <Select
+                            value={dateFilter}
+                            onValueChange={(value) => setDateFilter(value)}
+                          >
+                            <SelectTrigger className="h-9 w-[100px] bg-[#191F2E] border-gray-700 text-gray-200">
+                              <div className="flex items-center">
+                                <CalendarIcon className="h-4 w-4 mr-2" />
+                                <SelectValue>{dateFilter}</SelectValue>
+                              </div>
+                            </SelectTrigger>
+                            <SelectContent className="bg-[#191F2E] border-gray-700">
+                              <SelectItem value="7 days">7 days</SelectItem>
+                              <SelectItem value="14 days">14 days</SelectItem>
+                              <SelectItem value="30 days">30 days</SelectItem>
+                              <SelectItem value="60 days">60 days</SelectItem>
+                              <SelectItem value="90 days">90 days</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-9 gap-2 bg-[#191F2E] border-gray-700 text-gray-200 hover:bg-gray-800"
+                            onClick={fetchLatestTransactions}
+                          >
+                            <RefreshCcw className="h-4 w-4" />
+                            Refresh
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Transaction list */}
+                      <div className="space-y-2 mt-2">
+                        {isLoading ? (
+                          <div className="flex justify-center py-8">
+                            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                          </div>
+                        ) : transactions.length > 0 ? (
+                          <>
+                            {transactions.map((transaction, index) => (
+                              <div
+                                key={index}
+                                className="bg-[#131b2e]/70 backdrop-blur-sm rounded-lg px-4 py-3 flex justify-between items-center cursor-pointer hover:bg-[#1A2335] transition"
+                                onClick={() => handleTransactionClick(transaction)}
+                              >
+                                <div className="flex items-center">
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                    transaction.transaction_type === 'credited' ? 'bg-green-400/10 text-green-400' : 'bg-red-400/10 text-red-400'
+                                  }`}>
+                                    {transaction.transaction_type === 'credited' ?
+                                      <ArrowDown className="h-4 w-4" /> :
+                                      <ArrowUp className="h-4 w-4" />
+                                    }
+                                  </div>
+                                  <div className="ml-3">
+                                    <div className="font-medium text-white">{transaction.name}</div>
+                                    <div className="text-xs text-gray-400">
+                                      {new Date(transaction.date).toLocaleDateString('en-US', {
+                                        month: 'short',
+                                        day: 'numeric',
+                                        year: 'numeric'
+                                      })} • {transaction.time}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className={`font-medium ${
+                                  transaction.transaction_type === 'credited' ? 'text-green-400' : 'text-red-400'
+                                }`}>
+                                  {transaction.transaction_type === 'credited' ? '+' : '-'}₹{transaction.amount?.toFixed(2)}
+                                </div>
+                              </div>
+                            ))}
+
+                            {/* View More Button */}
+                            <div className="flex justify-center mt-4">
+                              <Button
+                                variant="link"
+                                className="text-blue-400 hover:text-blue-300"
+                                onClick={() => handleNavClick('dashboard')}
+                              >
+                                View More
+                              </Button>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="text-center py-8 text-gray-400">
+                            No transactions found. Add some transactions to get started.
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+
+                {activeView === 'profile' && renderUserProfile()}
+                {activeView === 'dashboard' && renderFullDashboard()}
+                {activeView === 'analytics' && renderAnalytics()}
+                {activeView === 'settings' && renderAccountSettings()}
+              </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+
+      {/* Modals and Toasts */}
+      {selectedTransaction && (
+        <TransactionDetailsModal
+          transaction={selectedTransaction}
+          isOpen={!!selectedTransaction}
+          onClose={() => setSelectedTransaction(null)}
+          onDelete={() => {
+            setSelectedTransaction(null);
+            fetchLatestTransactions();
+          }}
+          onUpdate={fetchLatestTransactions}
+        />
+      )}
+
+      <Toaster position="bottom-right" />
     </div>
   );
 }
