@@ -260,7 +260,7 @@ export default function TransactionDetailsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogClose}>
-      <DialogContent className="sm:max-w-lg md:max-w-xl">
+      <DialogContent className="sm:max-w-lg md:max-w-xl bg-[#111827]/90 backdrop-blur-md border-gray-800">
         <DialogHeader className="pb-2">
           <DialogTitle className="flex items-start justify-between text-xl mb-2 pr-6">
             <span>Transaction Details</span>
@@ -280,14 +280,14 @@ export default function TransactionDetailsModal({
         <div className="p-4 mt-2 space-y-0 bg-[#0E1525] rounded-lg">
           <div className="flex flex-col gap-5">
             {/* Tag Dropdown - Repositioned above name field */}
-            <div className="ml-1 px-3 py-2 z-10">
+            <div className="relative right-[10px] px-3 py-2 z-10">
               <div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
                       size="sm"
-                      className={`h-7 px-2.5 gap-1 border-gray-700 ${selectedTag ? 'text-white' : 'text-gray-400'} hover:bg-gray-800 bg-[#111827] shadow-sm`}
+                      className={`h-7 px-2.5     gap-1 border-gray-700 ${selectedTag ? 'text-white' : 'text-gray-400'} hover:bg-gray-800 bg-[#111827] shadow-sm`}
                       disabled={isTagUpdating}
                     >
                       {isTagUpdating ? (

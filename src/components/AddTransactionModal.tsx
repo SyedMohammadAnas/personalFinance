@@ -165,7 +165,7 @@ export default function AddTransactionModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogClose}>
-      <DialogContent className="sm:max-w-lg md:max-w-xl">
+      <DialogContent className="sm:max-w-lg md:max-w-xl bg-[#111827]/90 backdrop-blur-md border-gray-800">
         <DialogHeader className="pb-2">
           <DialogTitle className="flex items-start justify-between text-xl mb-2 pr-6">
             <span>Add Transaction</span>
