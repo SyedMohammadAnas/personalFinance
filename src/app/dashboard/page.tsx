@@ -203,6 +203,9 @@ export default function Dashboard() {
 
       if (allError) {
         console.error('Error fetching all transactions:', allError);
+        // Reset states to prevent reference errors
+        setLatestCredited(null);
+        setLatestDebited(null);
         return;
       }
 
@@ -224,23 +227,28 @@ export default function Dashboard() {
         t.transaction_type === 'debited' || t.transaction_type === 'Debited');
 
       // Set latest transactions of each type
-      if (creditedTransactions.length > 0) {
+      if (creditedTransactions && creditedTransactions.length > 0) {
         console.log('Latest credited transaction:', creditedTransactions[0]);
         setLatestCredited(creditedTransactions[0]);
       } else {
         // No credited transactions found
+        console.log('No credited transactions found');
         setLatestCredited(null);
       }
 
-      if (debitedTransactions.length > 0) {
+      if (debitedTransactions && debitedTransactions.length > 0) {
         console.log('Latest debited transaction:', debitedTransactions[0]);
         setLatestDebited(debitedTransactions[0]);
       } else {
         // No debited transactions found
+        console.log('No debited transactions found');
         setLatestDebited(null);
       }
     } catch (error) {
       console.error('Error fetching latest transactions:', error);
+      // Reset states to prevent reference errors on failed fetch
+      setLatestCredited(null);
+      setLatestDebited(null);
     }
   };
 

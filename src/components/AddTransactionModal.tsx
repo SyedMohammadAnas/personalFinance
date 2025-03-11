@@ -184,7 +184,7 @@ export default function AddTransactionModal({
         <div className="p-4 mt-2 space-y-0 bg-[#0E1525] rounded-lg">
           <div className="flex flex-col gap-5">
             {/* Tag Dropdown */}
-            <div className="ml-1 px-3 py-2 z-10">
+            <div className="relative right-[10px] px-3 py-2 z-10">
               <div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -193,7 +193,7 @@ export default function AddTransactionModal({
                       size="sm"
                       className={`h-7 px-2.5 gap-1 border-gray-700 ${selectedTag ? 'text-white' : 'text-gray-400'} hover:bg-gray-800 bg-[#111827] shadow-sm`}
                     >
-                      <Tag className="h-3.5 w-3.5 mr-1" />
+                      <Tag className=" h-3.5 w-3.5" />
                       {selectedTag || 'Select tag'}
                       <ChevronsUpDown className="h-3.5 w-3.5 ml-1 opacity-50" />
                     </Button>
@@ -349,7 +349,7 @@ export default function AddTransactionModal({
           <div className="flex gap-3">
             <Button
               type="button"
-              variant="primary"
+              variant="default"
               onClick={handleSave}
               disabled={isSubmitting}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2"
