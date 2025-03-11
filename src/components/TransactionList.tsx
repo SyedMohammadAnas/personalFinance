@@ -254,7 +254,7 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
     <>
       <Card className="border border-gray-800 bg-[#111827]/60 shadow-md text-white">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-white">Recent Transactions</CardTitle>
+          <CardTitle className="text-xl text-white">Recent Transactions</CardTitle>
           <div className="flex items-center gap-2">
             <AddTransactionButton onTransactionAdded={refreshTransactions} />
             <div className="flex items-center bg-gray-800 rounded-md">
@@ -326,17 +326,11 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
                         )}
                       </div>
                       <div className="ml-3 flex-1 flex items-center justify-between">
-                        <p className="text-sm font-medium text-white truncate max-w-[200px]">
-                          {transaction.name}
-                        </p>
-                        <p className={`text-sm font-medium ${
-                          transaction.transaction_type === 'credited'
-                            ? 'text-green-400'
-                            : 'text-red-400'
-                        }`}>
+                        <div className="flex-1 text-base">{transaction.name}</div>
+                        <div className={`flex flex-row ml-auto ${transaction.transaction_type === 'credited' ? 'text-green-400' : 'text-red-400'} text-base font-semibold`}>
                           {transaction.transaction_type === 'credited' ? '+' : '-'}
                           {formatCurrency(transaction.amount)}
-                        </p>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -371,17 +365,11 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
                           )}
                         </div>
                         <div className="ml-3 flex-1 flex items-center justify-between">
-                          <p className="text-sm font-medium text-white truncate max-w-[200px]">
-                            {transaction.name}
-                          </p>
-                          <p className={`text-sm font-medium ${
-                            transaction.transaction_type === 'credited'
-                              ? 'text-green-400'
-                              : 'text-red-400'
-                          }`}>
+                          <div className="flex-1 text-base">{transaction.name}</div>
+                          <div className={`flex flex-row ml-auto ${transaction.transaction_type === 'credited' ? 'text-green-400' : 'text-red-400'} text-base font-semibold`}>
                             {transaction.transaction_type === 'credited' ? '+' : '-'}
                             {formatCurrency(transaction.amount)}
-                          </p>
+                          </div>
                         </div>
                       </div>
                     ))}

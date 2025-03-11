@@ -71,7 +71,14 @@ function LatestTransactionCard({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-gray-400">No transactions found</p>
+          <div className="mt-2">
+            <div className="text-lg font-bold text-white truncate">
+              No {isCredit ? 'Income' : 'Expense'} Yet
+            </div>
+            <p className="text-base text-muted-foreground">
+              Your recent {isCredit ? 'income' : 'expense'} will appear here
+            </p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -107,20 +114,24 @@ function LatestTransactionCard({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
-          <div className="flex justify-between items-baseline">
-            <p className="text-sm font-medium text-white truncate max-w-[200px]">
-              {transaction.name}
-            </p>
-            <p className={`text-base font-semibold ${isCredit ? 'text-green-400' : 'text-red-400'}`}>
-              {isCredit ? '+' : '-'}₹{transaction.amount.toLocaleString('en-IN')}
-            </p>
-          </div>
-          <div className="text-xs text-gray-400">
-            {formattedDate} • {transaction.time}
+        <div className="mt-2">
+          <div className="text-lg font-bold text-white truncate">{transaction.name}</div>
+          <div className="text-base text-gray-400">
+            {new Date(transaction.date).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })}
+            {' · '}
+            {transaction.time.substring(0, 5)}
           </div>
         </div>
       </CardContent>
+      <div className="absolute bottom-0 right-0 m-4">
+        <div className={`text-xl font-bold ${isCredit ? 'text-green-400' : 'text-red-400'}`}>
+          {isCredit ? '+' : '-'}₹{transaction.amount.toLocaleString('en-IN')}
+        </div>
+      </div>
     </Card>
   );
 }
@@ -513,13 +524,13 @@ export default function Dashboard() {
         backgroundAttachment: "fixed"
       }}
     >
-      <div className="absolute inset-0 backdrop-blur-lg bg-[#0A0F1A]/50"></div>
+      <div className="absolute inset-0 backdrop-blur-none bg-[#0A0F1A]/15"></div>
       <div className="container mx-auto py-8 px-4 relative z-10">
         <Card className="border border-gray-800 bg-[#0F172A]/80 shadow-md text-white backdrop-blur-none">
           <CardContent className="p-0">
             <div className="flex flex-col md:flex-row">
               {/* Sidebar */}
-              <div className="w-full md:w-64 border-r border-gray-800 p-6 bg-[#0F172A]/95 backdrop-blur-none">
+              <div className="w-full md:w-64 border-r border-gray-800 p-6 bg-[#0F172A]/20 backdrop-blur-none">
                 {/* User info */}
                 <div className="flex flex-col items-center gap-3 border-b border-gray-800 pb-6">
                   <Avatar className="h-16 w-16">
@@ -533,8 +544,8 @@ export default function Dashboard() {
 
                 {/* Date and time */}
                 <div className="mt-6 border-b border-gray-800 pb-6 text-center">
-                  <p className="text-base text-gray-400">{formatDate(currentTime)}</p>
-                  <p className="text-3xl font-bold text-white mt-1">{formatTime(currentTime)}</p>
+                  <p className="text-lg text-gray-400">{formatDate(currentTime)}</p>
+                  <p className="text-4xl font-bold text-white mt-1">{formatTime(currentTime)}</p>
                 </div>
 
                 {/* Navigation Links - centered with flex */}
@@ -559,7 +570,7 @@ export default function Dashboard() {
                         onClick={() => item.view && handleNavClick(item.view)}
                       >
                         <item.icon className="h-5 w-5 mr-3" />
-                        <span>{item.name}</span>
+                        <span className="text-base">{item.name}</span>
                       </Link>
                     ))}
                   </nav>
@@ -567,7 +578,7 @@ export default function Dashboard() {
               </div>
 
               {/* Main Content */}
-              <div className="flex-1 p-6 border-l border-gray-800 backdrop-blur-none bg-[#0F172A]/80">
+              <div className="flex-1 p-6 border-l border-gray-800 backdrop-blur-none bg-[#0F172A]/20">
                 {/* Dashboard View */}
                 {activeView === 'dashboard' && (
                   <>

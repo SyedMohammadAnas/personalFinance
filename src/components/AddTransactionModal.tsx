@@ -167,7 +167,7 @@ export default function AddTransactionModal({
     <Dialog open={isOpen} onOpenChange={handleDialogClose}>
       <DialogContent className="sm:max-w-lg md:max-w-xl bg-[#111827]/90 backdrop-blur-md border-gray-800">
         <DialogHeader className="pb-2">
-          <DialogTitle className="flex items-start justify-between text-xl mb-2 pr-6">
+          <DialogTitle className="flex items-start justify-between text-2xl mb-2 pr-6">
             <span>Add Transaction</span>
             <div className="flex items-center mr-6">
               <div className={`text-base font-medium ${
@@ -294,8 +294,8 @@ export default function AddTransactionModal({
                   <textarea
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
-                    placeholder="Add a note about this transaction..."
-                    className="w-full min-h-[80px] rounded p-2 bg-[#1A2333] border border-gray-700 text-gray-200 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    placeholder="Add a note about this transaction (optional)"
+                    className="mt-2 w-full p-2 text-base rounded-md bg-gray-800 border border-gray-700 text-white"
                   />
                 </div>
               </div>
