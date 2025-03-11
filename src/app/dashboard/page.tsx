@@ -48,7 +48,7 @@ function LatestTransactionCard({
 
   if (!transaction) {
     return (
-      <Card className="h-72 p-4 border border-gray-800 rounded-md flex flex-col bg-gradient-to-b from-gray-800/60 to-gray-900/60 backdrop-blur-md overflow-hidden relative">
+      <Card className="h-72 p-4 border border-gray-800 rounded-md flex flex-col bg-[#111827]/60 overflow-hidden relative">
         <CardHeader className="pb-2">
           <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center mb-2">
             <svg
@@ -84,7 +84,7 @@ function LatestTransactionCard({
   });
 
   return (
-    <Card className="h-72 p-4 border border-gray-800 rounded-md flex flex-col bg-gradient-to-b from-gray-800/60 to-gray-900/60 backdrop-blur-md overflow-hidden relative">
+    <Card className="h-72 p-4 border border-gray-800 rounded-md flex flex-col bg-[#111827]/60 overflow-hidden relative">
       <CardHeader className="pb-2">
         <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center mb-2">
           <svg
@@ -125,6 +125,9 @@ function LatestTransactionCard({
   );
 }
 
+// Define a type for the view names
+type ViewType = 'dashboard' | 'profile' | 'analytics' | 'settings' | null;
+
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -134,7 +137,7 @@ export default function Dashboard() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [pathname, setPathname] = useState('/dashboard');
-  const [activeView, setActiveView] = useState('dashboard'); // initialize to dashboard view
+  const [activeView, setActiveView] = useState('dashboard');
   const [isCopied, setIsCopied] = useState(false);
   const [latestCredited, setLatestCredited] = useState<Transaction | null>(null);
   const [latestDebited, setLatestDebited] = useState<Transaction | null>(null);
@@ -501,186 +504,190 @@ export default function Dashboard() {
 
   return (
     <div
-      className="container mx-auto py-8 px-4 min-h-screen relative"
+      className="min-h-screen w-full relative overflow-hidden"
       style={{
         backgroundImage: "url('/images/TopoBackground.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
+        backgroundAttachment: "fixed"
       }}
     >
-      <Card className="border border-gray-800 bg-[#0F172A]/90 shadow-md text-white backdrop-blur-md">
-        <CardContent className="p-0">
-          <div className="flex flex-col md:flex-row">
-            {/* Sidebar */}
-            <div className="w-full md:w-64 border-r border-gray-800 p-6 bg-[#0F172A]/95">
-              {/* User info */}
-              <div className="flex flex-col items-center gap-3 border-b border-gray-800 pb-6">
-                <Avatar className="h-16 w-16">
-                  <AvatarImage src={session?.user?.image || ''} alt={session?.user?.name || 'User'} />
-                  <AvatarFallback className="bg-gray-700 text-lg">{session?.user?.name?.charAt(0) || 'U'}</AvatarFallback>
-                </Avatar>
-                <div className="text-center">
-                  <p className="text-lg font-medium text-white">{session?.user?.name}</p>
+      <div className="absolute inset-0 backdrop-blur-sm bg-[#0A0F1A]/40"></div>
+      <div className="container mx-auto py-8 px-4 relative z-10">
+        <Card className="border border-gray-800 bg-[#0F172A]/80 shadow-md text-white backdrop-blur-none">
+          <CardContent className="p-0">
+            <div className="flex flex-col md:flex-row">
+              {/* Sidebar */}
+              <div className="w-full md:w-64 border-r border-gray-800 p-6 bg-[#0F172A]/95 backdrop-blur-none">
+                {/* User info */}
+                <div className="flex flex-col items-center gap-3 border-b border-gray-800 pb-6">
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage src={session?.user?.image || ''} alt={session?.user?.name || 'User'} />
+                    <AvatarFallback className="bg-gray-700 text-lg">{session?.user?.name?.charAt(0) || 'U'}</AvatarFallback>
+                  </Avatar>
+                  <div className="text-center">
+                    <p className="text-lg font-medium text-white">{session?.user?.name}</p>
+                  </div>
+                </div>
+
+                {/* Date and time */}
+                <div className="mt-6 border-b border-gray-800 pb-6 text-center">
+                  <p className="text-base text-gray-400">{formatDate(currentTime)}</p>
+                  <p className="text-3xl font-bold text-white mt-1">{formatTime(currentTime)}</p>
+                </div>
+
+                {/* Navigation Links - centered with flex */}
+                <div className="mt-8 flex flex-col items-center">
+                  <nav className="space-y-3 w-full">
+                    {[
+                      { name: 'Home', icon: HomeIcon, href: '/', view: null },
+                      { name: 'Profile', icon: UserIcon, href: '#', view: 'profile' },
+                      { name: 'Dashboard', icon: LayoutDashboardIcon, href: '#', view: 'dashboard' },
+                      { name: 'Analytics', icon: BarChartIcon, href: '#', view: 'analytics' },
+                      { name: 'Settings', icon: Settings, href: '#', view: 'settings' },
+                    ].map((item) => (
+                      <Link
+                        key={item.name}
+                        href={item.view ? '#' : item.href}
+                        className={cn(
+                          'flex items-center px-3 py-2 text-gray-400 transition-all hover:text-white rounded-lg',
+                          activeView === item.view
+                            ? 'bg-gray-800 text-white'
+                            : 'hover:bg-gray-800'
+                        )}
+                        onClick={() => item.view && handleNavClick(item.view)}
+                      >
+                        <item.icon className="h-5 w-5 mr-3" />
+                        <span>{item.name}</span>
+                      </Link>
+                    ))}
+                  </nav>
                 </div>
               </div>
 
-              {/* Date and time */}
-              <div className="mt-6 border-b border-gray-800 pb-6 text-center">
-                <p className="text-base text-gray-400">{formatDate(currentTime)}</p>
-                <p className="text-3xl font-bold text-white mt-1">{formatTime(currentTime)}</p>
-              </div>
+              {/* Main Content */}
+              <div className="flex-1 p-6 border-l border-gray-800 backdrop-blur-none bg-[#0F172A]/80">
+                {/* Dashboard View */}
+                {activeView === 'dashboard' && (
+                  <>
+                    <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+                      {/* Latest Credited Transaction Card */}
+                      <LatestTransactionCard
+                        transaction={latestCredited}
+                        type="credited"
+                      />
+                      {/* Latest Debited Transaction Card */}
+                      <LatestTransactionCard
+                        transaction={latestDebited}
+                        type="debited"
+                      />
+                    </div>
 
-              {/* Navigation Links - centered with flex */}
-              <div className="mt-8 flex flex-col items-center">
-                <nav className="space-y-3 w-full">
-                  {[
-                    { name: 'Home', icon: HomeIcon, href: '/', view: null },
-                    { name: 'Profile', icon: UserIcon, href: '#', view: 'profile' },
-                    { name: 'Dashboard', icon: LayoutDashboardIcon, href: '#', view: 'dashboard' },
-                    { name: 'Analytics', icon: BarChartIcon, href: '#', view: 'analytics' },
-                    { name: 'Settings', icon: Settings, href: '#', view: 'settings' },
-                  ].map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.view ? '#' : item.href}
-                      className={cn(
-                        'flex items-center px-3 py-2 text-gray-400 transition-all hover:text-white rounded-lg',
-                        activeView === item.view
-                          ? 'bg-gray-800 text-white'
-                          : 'hover:bg-gray-800'
-                      )}
-                      onClick={() => item.view && handleNavClick(item.view)}
-                    >
-                      <item.icon className="h-5 w-5 mr-3" />
-                      <span>{item.name}</span>
-                    </Link>
-                  ))}
-                </nav>
-              </div>
-            </div>
+                    {/* Add the onTransactionsUpdated prop to TransactionList */}
+                    <div className="mt-6">
+                      <TransactionList onTransactionsUpdated={fetchLatestTransactions} />
+                    </div>
+                  </>
+                )}
 
-            {/* Main Content */}
-            <div className="flex-1 p-6 border-l border-gray-800 backdrop-blur-sm bg-[#0F172A]/80">
-              {/* Dashboard View */}
-              {activeView === 'dashboard' && (
-                <>
-                  <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-                    {/* Latest Credited Transaction Card */}
-                    <LatestTransactionCard
-                      transaction={latestCredited}
-                      type="credited"
-                    />
-                    {/* Latest Debited Transaction Card */}
-                    <LatestTransactionCard
-                      transaction={latestDebited}
-                      type="debited"
-                    />
+                {/* Analytics View */}
+                {activeView === 'analytics' && (
+                  <div>
+                    <div className="mb-6">
+                      <h2 className="text-2xl font-bold text-white">Financial Analytics</h2>
+                      <p className="text-gray-400">View your transaction analytics and insights</p>
+                    </div>
+                    <TransactionAnalytics />
                   </div>
+                )}
 
-                  {/* Add the onTransactionsUpdated prop to TransactionList */}
-                  <div className="mt-6">
-                    <TransactionList onTransactionsUpdated={fetchLatestTransactions} />
-                  </div>
-                </>
-              )}
+                {/* Profile View */}
+                {activeView === 'profile' && (
+                  <div>
+                    <div className="mb-6">
+                      <h2 className="text-2xl font-bold text-white">User Profile</h2>
+                      <p className="text-gray-400">Your account details and preferences</p>
+                    </div>
 
-              {/* Analytics View */}
-              {activeView === 'analytics' && (
-                <div>
-                  <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-white">Financial Analytics</h2>
-                    <p className="text-gray-400">View your transaction analytics and insights</p>
-                  </div>
-                  <TransactionAnalytics />
-                </div>
-              )}
-
-              {/* Profile View */}
-              {activeView === 'profile' && (
-                <div>
-                  <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-white">User Profile</h2>
-                    <p className="text-gray-400">Your account details and preferences</p>
-                  </div>
-
-                  <div className="grid gap-8">
-                    {/* Personal Information Card */}
-                    <Card className="bg-[#111827] border border-gray-800">
-                      <CardHeader>
-                        <CardTitle className="text-white">Personal Information</CardTitle>
-                        <CardDescription className="text-gray-400">Your account details from Google login</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                          {/* User profile image */}
-                          <div className="flex-shrink-0">
-                            <ProfileImage
-                              src={session?.user?.image}
-                              alt={session?.user?.name || 'User'}
-                              size={96}
-                            />
-                          </div>
-
-                          {/* User details */}
-                          <div className="space-y-4 flex-grow">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <label className="text-sm text-gray-400">Full Name</label>
-                                <p className="text-white font-medium">{session?.user?.name}</p>
-                              </div>
-
-                              <div>
-                                <label className="text-sm text-gray-400">Email Address</label>
-                                <p className="text-white font-medium">{session?.user?.email}</p>
-                              </div>
+                    <div className="grid gap-8">
+                      {/* Personal Information Card */}
+                      <Card className="bg-[#111827] border border-gray-800">
+                        <CardHeader>
+                          <CardTitle className="text-white">Personal Information</CardTitle>
+                          <CardDescription className="text-gray-400">Your account details from Google login</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                            {/* User profile image */}
+                            <div className="flex-shrink-0">
+                              <ProfileImage
+                                src={session?.user?.image}
+                                alt={session?.user?.name || 'User'}
+                                size={96}
+                              />
                             </div>
 
-                            <div>
-                              <label className="text-sm text-gray-400">User ID</label>
-                              <div className="flex items-center space-x-2 mt-1">
-                                <code className="bg-gray-800 px-2 py-1 rounded text-xs text-gray-300 w-56 truncate">
-                                  {session?.user?.id || 'No ID available'}
-                                </code>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-8 px-2 border-gray-700 bg-gray-800 hover:bg-gray-700"
-                                  onClick={copyToClipboard}
-                                >
-                                  {isCopied ? (
-                                    <Check className="h-4 w-4 text-green-400" />
-                                  ) : (
-                                    <Copy className="h-4 w-4 text-gray-400" />
-                                  )}
-                                </Button>
+                            {/* User details */}
+                            <div className="space-y-4 flex-grow">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm text-gray-400">Full Name</label>
+                                  <p className="text-white font-medium">{session?.user?.name}</p>
+                                </div>
+
+                                <div>
+                                  <label className="text-sm text-gray-400">Email Address</label>
+                                  <p className="text-white font-medium">{session?.user?.email}</p>
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="text-sm text-gray-400">User ID</label>
+                                <div className="flex items-center space-x-2 mt-1">
+                                  <code className="bg-gray-800 px-2 py-1 rounded text-xs text-gray-300 w-56 truncate">
+                                    {session?.user?.id || 'No ID available'}
+                                  </code>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 px-2 border-gray-700 bg-gray-800 hover:bg-gray-700"
+                                    onClick={copyToClipboard}
+                                  >
+                                    {isCopied ? (
+                                      <Check className="h-4 w-4 text-green-400" />
+                                    ) : (
+                                      <Copy className="h-4 w-4 text-gray-400" />
+                                    )}
+                                  </Button>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                        </CardContent>
+                      </Card>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Settings View */}
-              {activeView === 'settings' && (
-                <div>
-                  <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-white">Account Settings</h2>
-                    <p className="text-gray-400">Manage your account preferences and connections</p>
-                  </div>
+                {/* Settings View */}
+                {activeView === 'settings' && (
+                  <div>
+                    <div className="mb-6">
+                      <h2 className="text-2xl font-bold text-white">Account Settings</h2>
+                      <p className="text-gray-400">Manage your account preferences and connections</p>
+                    </div>
 
-                  <div className="grid gap-8">
-                    {renderAccountSettings()}
+                    <div className="grid gap-8">
+                      {renderAccountSettings()}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

@@ -252,7 +252,7 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
 
   return (
     <>
-      <Card className="border border-gray-800 bg-[#111827]/70 shadow-md text-white backdrop-blur-sm">
+      <Card className="border border-gray-800 bg-[#111827]/60 shadow-md text-white">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-white">Recent Transactions</CardTitle>
           <div className="flex items-center gap-2">
