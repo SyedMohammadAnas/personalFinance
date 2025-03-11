@@ -124,10 +124,10 @@ export default function AddTransactionModal({
       const safeEmail = session.user.email.toLowerCase().replace(/[@.]/g, '_');
       const tableName = `transactions_${safeEmail}`;
 
-      // Create new transaction object with null user_id and email_id for manual transactions
+      // Create new transaction object
       const newTransaction = {
-        user_id: null, // Set to null for manual transactions
-        email_id: null, // Set to null for manual transactions
+        // user_id and email_id are intentionally omitted for manual transactions
+        // This requires running the SQL script to make these fields nullable in the database
         name: transactionName.trim(),
         amount: parseFloat(transactionAmount),
         date: date,

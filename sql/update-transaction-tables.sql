@@ -1,65 +1,46 @@
--- =====================================================
--- UPDATE TRANSACTION TABLES TO ALLOW MANUAL TRANSACTIONS
--- =====================================================
-
--- Function to update transaction tables to allow manual transactions
-CREATE OR REPLACE FUNCTION update_transaction_tables_for_manual_entries()
-RETURNS TEXT AS $$
+-- Function to update all existing transaction tables to make user_id and email_id nullable
+CREATE OR REPLACE FUNCTION update_transaction_tables_schema()
+RETURNS VOID AS $$
 DECLARE
-    user_record RECORD;
-    table_count INTEGER := 0;
+    table_record RECORD;
 BEGIN
-    -- Loop through all users
-    FOR user_record IN SELECT email FROM public.users LOOP
-        -- Create a safe table name
-        DECLARE
-            safe_email TEXT := REPLACE(REPLACE(user_record.email, '@', '_'), '.', '_');
-            table_name TEXT := 'transactions_' || safe_email;
-        BEGIN
-            -- Check if the table exists
-            EXECUTE format('
-                DO $$
-                BEGIN
-                    IF EXISTS (
-                        SELECT FROM information_schema.tables
-                        WHERE table_schema = ''public''
-                        AND table_name = ''%1$s''
-                    ) THEN
-                        -- Alter the table to allow null values for user_id and email_id
-                        ALTER TABLE public.%1$s
-                        ALTER COLUMN user_id DROP NOT NULL,
-                        ALTER COLUMN email_id DROP NOT NULL;
+    -- Loop through all tables that match our transaction table naming pattern
+    FOR table_record IN
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_name LIKE 'transactions_%'
+    LOOP
+        -- Alter the table to allow NULL values for user_id and email_id
+        EXECUTE format('
+            ALTER TABLE public.%I
+            ALTER COLUMN user_id DROP NOT NULL,
+            ALTER COLUMN email_id DROP NOT NULL',
+            table_record.table_name
+        );
 
-                        -- Remove the unique constraint on email_id to allow manual transactions
-                        ALTER TABLE public.%1$s
-                        DROP CONSTRAINT IF EXISTS %1$s_email_id_key;
+        -- Update the RLS policy to account for NULL user_id
+        EXECUTE format('
+            DROP POLICY IF EXISTS "Users can access their own transactions" ON public.%I;
+            CREATE POLICY "Users can access their own transactions"
+            ON public.%I
+            FOR ALL
+            USING (user_id = auth.uid() OR user_id IS NULL)',
+            table_record.table_name, table_record.table_name
+        );
 
-                        -- Update RLS policy for manual transactions
-                        DROP POLICY IF EXISTS "Users can access their own transactions" ON public.%1$s;
-                        CREATE POLICY "Users can access their own transactions"
-                        ON public.%1$s
-                        FOR ALL
-                        USING (
-                            (user_id IS NULL) OR
-                            (user_id = auth.uid())
-                        );
-                    END IF;
-                END
-                $$;', table_name);
-
-            -- Increment counter
-            table_count := table_count + 1;
-        END;
+        RAISE NOTICE 'Updated schema for table: %', table_record.table_name;
     END LOOP;
 
-    RETURN format('Updated %s transaction tables to allow manual transactions', table_count);
+    RAISE NOTICE 'All transaction tables updated successfully';
 END;
 $$ LANGUAGE plpgsql;
 
--- Execute the function to update all existing transaction tables
-SELECT update_transaction_tables_for_manual_entries();
+-- Execute the function to update all existing tables
+SELECT update_transaction_tables_schema();
 
--- Update the create_user_transaction_table function for future tables
+-- Update the table creation functions to create nullable columns
+-- First, update the one-time creation function
 CREATE OR REPLACE FUNCTION create_user_transaction_table(user_email TEXT)
 RETURNS VOID AS $$
 DECLARE
@@ -74,18 +55,17 @@ BEGIN
     EXECUTE format('
         CREATE TABLE IF NOT EXISTS public.%I (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-            user_id TEXT,  -- Nullable for manual transactions
-            email_id TEXT,  -- Nullable for manual transactions
+            user_id TEXT,  -- Nullable
+            email_id TEXT,  -- Nullable
             amount DECIMAL(12,2) NOT NULL,
             name TEXT,
             date DATE NOT NULL,
             time TIME NOT NULL,
             transaction_type TEXT NOT NULL,
-            tag TEXT,
-            description TEXT,
             created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
 
-            -- Foreign key to users table (only if user_id is not null)
+            -- Unique constraint removed since email_id can be NULL
+            -- Foreign key maintains referential integrity when user_id is not NULL
             CONSTRAINT fk_user
                 FOREIGN KEY (user_id)
                 REFERENCES public.users(id)
@@ -100,10 +80,7 @@ BEGIN
         CREATE POLICY "Users can access their own transactions"
         ON public.%I
         FOR ALL
-        USING (
-            (user_id IS NULL) OR
-            (user_id = auth.uid())
-        )', table_name);
+        USING (user_id = auth.uid() OR user_id IS NULL)', table_name);
 
     -- Grant permissions
     EXECUTE format('GRANT ALL ON public.%I TO authenticated', table_name);
@@ -113,7 +90,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Also update the trigger function
+-- Then, update the trigger function
 CREATE OR REPLACE FUNCTION create_user_transaction_table_trigger()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -128,18 +105,17 @@ BEGIN
     EXECUTE format('
         CREATE TABLE IF NOT EXISTS public.%I (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-            user_id TEXT,  -- Nullable for manual transactions
-            email_id TEXT,  -- Nullable for manual transactions
+            user_id TEXT,  -- Nullable
+            email_id TEXT,  -- Nullable
             amount DECIMAL(12,2) NOT NULL,
             name TEXT,
             date DATE NOT NULL,
             time TIME NOT NULL,
             transaction_type TEXT NOT NULL,
-            tag TEXT,
-            description TEXT,
             created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
 
-            -- Foreign key to users table (only if user_id is not null)
+            -- Unique constraint removed since email_id can be NULL
+            -- Foreign key maintains referential integrity when user_id is not NULL
             CONSTRAINT fk_user
                 FOREIGN KEY (user_id)
                 REFERENCES public.users(id)
@@ -149,17 +125,14 @@ BEGIN
     -- Enable RLS on the new table
     EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', table_name);
 
-    -- Create RLS policy for the table
+    -- Create RLS policy for the table - users can see their own data and manual entries
     EXECUTE format('
         DROP POLICY IF EXISTS "Users can access their own transactions" ON public.%I;
         CREATE POLICY "Users can access their own transactions"
         ON public.%I
         FOR ALL
-        USING (
-            (user_id IS NULL) OR
-            (user_id = %L)
-        )',
-        table_name, table_name, NEW.id);
+        USING (user_id = auth.uid() OR user_id IS NULL)',
+        table_name, table_name);
 
     -- Grant permissions
     EXECUTE format('GRANT ALL ON public.%I TO anon', table_name);
@@ -171,5 +144,35 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Log success
-SELECT 'Transaction table schemas updated to allow manual transactions' as result;
+-- Remove the unique constraint on email_id from existing tables
+CREATE OR REPLACE FUNCTION remove_email_unique_constraints()
+RETURNS VOID AS $$
+DECLARE
+    table_record RECORD;
+    constraint_name TEXT;
+BEGIN
+    FOR table_record IN
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_name LIKE 'transactions_%'
+    LOOP
+        -- Try to drop the unique constraint if it exists
+        BEGIN
+            EXECUTE format('
+                ALTER TABLE public.%I
+                DROP CONSTRAINT IF EXISTS %I_email_id_key',
+                table_record.table_name, table_record.table_name
+            );
+            RAISE NOTICE 'Removed unique constraint on email_id for table: %', table_record.table_name;
+        EXCEPTION WHEN OTHERS THEN
+            RAISE NOTICE 'No unique constraint to remove for table: %', table_record.table_name;
+        END;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT remove_email_unique_constraints();
+
+-- Message to confirm schema updates
+SELECT 'Transaction table schemas updated to allow manual entries with NULL user_id and email_id' as result;
