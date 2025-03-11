@@ -21,6 +21,7 @@ import {
   SelectValue
 } from './ui/select';
 import TransactionDetailsModal from './TransactionDetailsModal';
+import { AddTransactionButton } from './AddTransactionModal';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -255,6 +256,7 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-white">Recent Transactions</CardTitle>
           <div className="flex items-center gap-2">
+            <AddTransactionButton onTransactionAdded={refreshTransactions} />
             <div className="flex items-center bg-gray-800 rounded-md">
               <Select value={dayFilter} onValueChange={handleDayFilterChange}>
                 <SelectTrigger className="h-8 min-w-[120px] border-0 bg-transparent focus:ring-0 focus:ring-offset-0">
