@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Pencil, Save, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { Pencil, Save, ArrowUpRight, ArrowDownLeft, Check, ChevronsUpDown, Tag } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import {
@@ -11,6 +11,12 @@ import {
   DialogTitle,
   DialogFooter,
 } from './ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 
 // Transaction type
 interface Transaction {
@@ -23,6 +29,7 @@ interface Transaction {
   transaction_type: string;
   created_at: string;
   description?: string;
+  tag?: string;
 }
 
 interface TransactionDetailsModalProps {
@@ -42,15 +49,21 @@ export default function TransactionDetailsModal({
   const [newName, setNewName] = useState('');
   const [isNoteEditing, setIsNoteEditing] = useState(false);
   const [newNote, setNewNote] = useState('');
+  const [selectedTag, setSelectedTag] = useState<string>('');
+  const [isTagUpdating, setIsTagUpdating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isNoteSaving, setIsNoteSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize new name and note when transaction changes
+  // Available tag options
+  const tagOptions = ["Food", "Travel", "Entertainment", "Shopping", "Others"];
+
+  // Initialize new name, note, and tag when transaction changes
   useEffect(() => {
     if (transaction) {
       setNewName(transaction.name);
       setNewNote(transaction.description || '');
+      setSelectedTag(transaction.tag || '');
       // Reset editing states when transaction changes
       setIsEditing(false);
       setIsNoteEditing(false);
@@ -189,6 +202,50 @@ export default function TransactionDetailsModal({
     }
   };
 
+  // Handle tag selection
+  const handleTagSelect = async (tag: string) => {
+    if (!transaction || tag === transaction.tag) return;
+
+    try {
+      setIsTagUpdating(true);
+      setError(null);
+
+      console.log(`Updating transaction ${transaction.id} with new tag: "${tag}"`);
+
+      const response = await fetch('/api/transactions/update', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          transactionId: transaction.id,
+          tag: tag
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update transaction tag');
+      }
+
+      console.log(`Transaction tag updated successfully:`, result);
+      setSelectedTag(tag);
+
+      // Wait for a brief moment before notifying parent to ensure state updates propagate
+      setTimeout(() => {
+        // Notify parent component to refresh data
+        onTransactionUpdated();
+        console.log('Notified parent component to refresh transactions after tag update');
+      }, 300);
+    } catch (err) {
+      console.error('Error updating transaction tag:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update transaction tag');
+    } finally {
+      setIsTagUpdating(false);
+    }
+  };
+
   // Reset state when dialog is closed
   const handleDialogClose = () => {
     setIsEditing(false);
@@ -289,6 +346,47 @@ export default function TransactionDetailsModal({
                   <span className="text-sm text-gray-300 capitalize">
                     {transaction.transaction_type}
                   </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Transaction Tag - Dropdown */}
+            <div className="p-3 bg-gray-900 rounded-md border border-gray-800">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-400">Tag:</span>
+                <div className="flex items-center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={`h-8 gap-1 border-gray-700 ${selectedTag ? 'text-white' : 'text-gray-400'} hover:bg-gray-800`}
+                        disabled={isTagUpdating}
+                      >
+                        {isTagUpdating ? (
+                          <div className="h-3.5 w-3.5 border-2 border-t-transparent border-current rounded-full animate-spin mr-1" />
+                        ) : (
+                          <Tag className="h-3.5 w-3.5 mr-1" />
+                        )}
+                        {selectedTag || 'Select tag'}
+                        <ChevronsUpDown className="h-3.5 w-3.5 ml-1 opacity-50" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-gray-900 border-gray-700 text-gray-200">
+                      {tagOptions.map((tag) => (
+                        <DropdownMenuItem
+                          key={tag}
+                          onClick={() => handleTagSelect(tag)}
+                          className={`flex items-center cursor-pointer hover:bg-gray-800 ${selectedTag === tag ? 'text-blue-400' : ''}`}
+                        >
+                          {selectedTag === tag && <Check className="h-3.5 w-3.5 mr-2" />}
+                          <span className={selectedTag === tag ? 'ml-0' : 'ml-5.5'}>
+                            {tag}
+                          </span>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </div>

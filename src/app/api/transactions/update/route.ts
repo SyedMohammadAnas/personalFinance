@@ -2,7 +2,7 @@
  * Transaction Update API
  *
  * This API allows updating transaction details in the user's transaction table,
- * such as renaming a transaction's name field or updating its description.
+ * such as renaming a transaction's name field, updating its description, or setting a tag.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -28,7 +28,7 @@ export async function PATCH(request: NextRequest) {
 
     // Get the transaction data from the request body
     const data = await request.json();
-    const { transactionId, name, description } = data;
+    const { transactionId, name, description, tag } = data;
 
     if (!transactionId) {
       console.log('Transaction update: Transaction ID is missing');
@@ -38,8 +38,12 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    // At least one of name or description must be provided
-    if ((!name || name.trim() === '') && description === undefined) {
+    // At least one of name, description, or tag must be provided
+    if (
+      (!name || name.trim() === '') &&
+      description === undefined &&
+      tag === undefined
+    ) {
       console.log('Transaction update: No valid update fields provided');
       return NextResponse.json(
         { error: 'At least one valid update field is required' },
@@ -54,7 +58,7 @@ export async function PATCH(request: NextRequest) {
     // Check if transaction exists before updating
     const { data: existingTransaction, error: checkError } = await supabase
       .from(tableName)
-      .select('id, name, description')
+      .select('id, name, description, tag')
       .eq('id', transactionId)
       .single();
 
@@ -74,10 +78,14 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    console.log(`Transaction update: Found transaction, current name: "${existingTransaction.name}", description: "${existingTransaction.description || ''}"`);
+    console.log(
+      `Transaction update: Found transaction, current name: "${existingTransaction.name}", ` +
+      `description: "${existingTransaction.description || ''}", ` +
+      `tag: "${existingTransaction.tag || ''}"`
+    );
 
     // Prepare update object
-    const updateData: { name?: string; description?: string } = {};
+    const updateData: { name?: string; description?: string; tag?: string } = {};
 
     // Add fields to update object if they are provided
     if (name !== undefined) {
@@ -86,6 +94,10 @@ export async function PATCH(request: NextRequest) {
 
     if (description !== undefined) {
       updateData.description = description;
+    }
+
+    if (tag !== undefined) {
+      updateData.tag = tag;
     }
 
     // Update the transaction
@@ -110,6 +122,9 @@ export async function PATCH(request: NextRequest) {
     }
     if (description !== undefined) {
       console.log(`Transaction update: Updated description from "${existingTransaction.description || ''}" to "${updateData.description}"`);
+    }
+    if (tag !== undefined) {
+      console.log(`Transaction update: Updated tag from "${existingTransaction.tag || ''}" to "${updateData.tag}"`);
     }
 
     return NextResponse.json({
