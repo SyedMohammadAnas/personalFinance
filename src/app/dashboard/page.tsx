@@ -513,7 +513,7 @@ export default function Dashboard() {
         backgroundAttachment: "fixed"
       }}
     >
-      <div className="absolute inset-0 backdrop-blur-sm bg-[#0A0F1A]/40"></div>
+      <div className="absolute inset-0 backdrop-blur-lg bg-[#0A0F1A]/50"></div>
       <div className="container mx-auto py-8 px-4 relative z-10">
         <Card className="border border-gray-800 bg-[#0F172A]/80 shadow-md text-white backdrop-blur-none">
           <CardContent className="p-0">
