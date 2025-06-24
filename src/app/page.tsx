@@ -99,18 +99,7 @@ export default function Home() {
               <p className="mt-4 text-white text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                 You are now signed in with your Google account. You can access all the features of our application.
               </p>
-              <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Link
-                  href="/profile"
-                  className="block transition-transform hover:scale-105 hover:shadow-md"
-                >
-                  <div className="p-4 bg-white/10 backdrop-blur-sm rounded-lg cursor-pointer">
-                    <h3 className="text-2xl font-extrabold text-blue-900 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Profile</h3>
-                    <p className="mt-2 text-sm text-gray-200 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-                      View and edit your profile information
-                    </p>
-                  </div>
-                </Link>
+              <div className="mt-8 grid grid-cols-1 gap-4">
                 <Link
                   href="/dashboard"
                   className="block transition-transform hover:scale-105 hover:shadow-md"
