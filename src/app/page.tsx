@@ -32,11 +32,11 @@ export default function Home() {
             <Image
               src="/personalFinanceLogo.png"
               alt="Personal Finance Logo"
-              width={50}
-              height={50}
+              width={40}
+              height={40}
               className="rounded-full"
             />
-            <span className="text-2xl font-semibold text-white">Personal Finance</span>
+            <span className="text-xl font-semibold text-white">Personal Finance</span>
           </div>
 
           <div>
@@ -128,7 +128,7 @@ export default function Home() {
             <div className="mt-10">
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-bold rounded-lg text-white bg-blue-400 hover:bg-blue-900"
+                className="inline-flex items-center justify-center px-5 py-3 border-4 border-white/90 text-base font-bold rounded-lg text-white bg-blue-400 hover:bg-blue-900 shadow-[0_0_10px_rgba(255,255,255,0.3)]"
               >
                 Get started
               </Link>

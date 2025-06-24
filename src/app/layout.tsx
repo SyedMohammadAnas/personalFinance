@@ -42,7 +42,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-      <link rel="icon" href="/personalFinanceLogo.png" type="image/png" />
+        <link rel="icon" href="/personalFinanceLogo.png" type="image/png" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Personal Finance" />
+        <link rel="apple-touch-icon" href="/personalFinanceLogo-180.png" />
       </head>
       <body className={jetbrainsMono.className}>
         <Providers>
