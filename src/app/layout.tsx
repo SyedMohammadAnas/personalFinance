@@ -42,7 +42,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/public/personalFinanceLogo.png" type="image/png" />
+      <link rel="icon" href="/personalFinanceLogo.png" type="image/png" />
       </head>
       <body className={jetbrainsMono.className}>
         <Providers>
