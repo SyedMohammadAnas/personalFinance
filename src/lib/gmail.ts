@@ -210,7 +210,7 @@ async function getEmailDetails(gmailClient: gmail_v1.Gmail, messageId: string): 
     let rawContent = '';
 
     // Handle different payload structures
-    if (message.data.payload.parts && message.data.payload.parts.length > 0) {
+    if (message.data.payload && message.data.payload.parts && message.data.payload.parts.length > 0) {
       // Get the plain text part if available
       const textPart = (message.data.payload.parts as GmailPart[]).find(
         (part: GmailPart) => part.mimeType === 'text/plain'
@@ -226,7 +226,7 @@ async function getEmailDetails(gmailClient: gmail_v1.Gmail, messageId: string): 
 
       // Store the raw content for later parsing
       rawContent = body;
-    } else if (message.data.payload.body && message.data.payload.body.data) {
+    } else if (message.data.payload && message.data.payload.body && message.data.payload.body.data) {
       const buff = Buffer.from(message.data.payload.body.data, 'base64');
       body = buff.toString('utf-8');
       rawContent = body;
