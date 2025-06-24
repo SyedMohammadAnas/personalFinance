@@ -16,8 +16,8 @@ export default function Home() {
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
         <Image
-          src="/images/water-background.jpeg"
-          alt="Water background"
+          src="/images/backgroundMain.jpg"
+          alt="Main background"
           fill
           priority
           className="object-cover brightness-110"
