@@ -78,8 +78,8 @@ export async function fetchEmails(
 
     // Fetch full details for each message
     for (const message of messages) {
-      if (!message.id) continue; // Skip if id is null or undefined
       try {
+        if (!message.id) continue; // Skip if id is null or undefined
         const emailData = await getEmailDetails(gmailClient, message.id);
         if (emailData) {
           // Check if this is a bank email - more specific filtering
