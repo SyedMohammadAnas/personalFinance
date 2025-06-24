@@ -4,7 +4,7 @@
  * This API endpoint handles revoking a user's Google Gmail authorization tokens
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { createClient } from '@supabase/supabase-js';
 

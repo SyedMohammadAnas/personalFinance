@@ -81,13 +81,13 @@ export async function storeTokens(
       // If record exists, update it; otherwise, insert new record
       if (existingTokens && existingTokens.length > 0) {
         // Update existing record
-        const { error } = await supabase
+        const updateResult = await supabase
           .from('user_tokens')
           .update(tokenRecord)
           .eq('user_id', userId);
 
-        if (error) {
-          console.error('Error updating token with Supabase client:', error);
+        if (updateResult.error) {
+          console.error('Error updating token with Supabase client:', updateResult.error);
           // Fall back to direct REST API approach
         } else {
           console.log('Successfully updated token with Supabase client');
@@ -95,15 +95,15 @@ export async function storeTokens(
         }
       } else {
         // Insert new record
-        const { error } = await supabase
+        const insertResult = await supabase
           .from('user_tokens')
           .insert({
             ...tokenRecord,
             created_at: new Date().toISOString()
           });
 
-        if (error) {
-          console.error('Error inserting token with Supabase client:', error);
+        if (insertResult.error) {
+          console.error('Error inserting token with Supabase client:', insertResult.error);
           // Fall back to direct REST API approach
         } else {
           console.log('Successfully inserted token with Supabase client');
