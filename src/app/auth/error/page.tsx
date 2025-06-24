@@ -2,11 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
-export default function Page({
-  searchParams,
-}: {
+// Define a PageProps interface for clarity
+interface PageProps {
   searchParams: { [key: string]: string | string[] | undefined };
-}) {
+}
+
+// Main error page component for authentication errors
+export default function Page({ searchParams }: PageProps) {
   // Handle error param as string or array
   let error = searchParams.error;
   if (Array.isArray(error)) {
