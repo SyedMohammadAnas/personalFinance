@@ -45,7 +45,7 @@ function LatestTransactionCard({
 
   if (!transaction) {
     return (
-      <Card className="h-44 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-[#111827]/60 overflow-hidden relative">
+      <Card className="h-44 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-white overflow-hidden relative">
         <CardHeader className="pb-1 sm:pb-2">
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-800 flex items-center justify-center mb-1 sm:mb-2">
             <svg
@@ -82,7 +82,7 @@ function LatestTransactionCard({
   }
 
   return (
-    <Card className="h-50 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-[#111827]/60 overflow-hidden relative">
+    <Card className="h-50 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-white overflow-hidden relative">
       <CardHeader className="pb-1 sm:pb-2">
         <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-800 flex items-center justify-center mb-1 sm:mb-2">
           <svg
@@ -385,7 +385,7 @@ export default function Dashboard() {
   const renderAccountSettings = () => (
     <div className="grid gap-8 md:gap-10">
       {/* Email Integration Section */}
-      <Card className="bg-[#111827] border border-gray-800">
+        <Card className="bg-white border border-gray-800">
         <CardHeader>
           <CardTitle className="text-white">Email Integration</CardTitle>
           <CardDescription className="text-gray-400">
@@ -422,7 +422,7 @@ export default function Dashboard() {
       </Card>
 
       {/* Data Management Section */}
-      <Card className="bg-[#111827] border border-gray-800">
+      <Card className="bg-white border border-gray-800">
         <CardHeader>
           <CardTitle className="text-white">Data Management</CardTitle>
           <CardDescription className="text-gray-400">
@@ -492,7 +492,7 @@ export default function Dashboard() {
     <div
       className="min-h-screen w-full relative overflow-hidden"
       style={{
-        backgroundImage: `url('/images/TopoBackground.jpg')`,
+        backgroundImage: `url('/images/mobileBackground.jpg')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
