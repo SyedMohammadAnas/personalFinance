@@ -8,8 +8,8 @@ import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Area, AreaChart, PieChart, Pie, Cell, Legend
+  XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, Area, AreaChart, PieChart, Pie, Cell
 } from 'recharts';
 
 // Initialize Supabase client
@@ -28,25 +28,6 @@ interface Transaction {
   time: string;
   transaction_type: 'credited' | 'debited';
   created_at: string;
-}
-
-// Group transactions by date
-function groupTransactionsByDate(transactions: Transaction[]) {
-  const grouped: Record<string, { credited: number; debited: number }> = {};
-
-  transactions.forEach(transaction => {
-    if (!grouped[transaction.date]) {
-      grouped[transaction.date] = { credited: 0, debited: 0 };
-    }
-
-    if (transaction.transaction_type === 'credited') {
-      grouped[transaction.date].credited += transaction.amount;
-    } else {
-      grouped[transaction.date].debited += transaction.amount;
-    }
-  });
-
-  return grouped;
 }
 
 // Calculate transaction type distribution
@@ -112,7 +93,7 @@ function prepareSpendingData(transactions: Transaction[], dayCount: number) {
   const dailySpending: Record<string, number> = {};
 
   // Get the date range - if we have transactions, use their dates, otherwise use the last dayCount days
-  let startDate = new Date();
+  const startDate = new Date();
   startDate.setDate(startDate.getDate() - dayCount + 1);
 
   // Generate all dates in the range
@@ -150,8 +131,12 @@ function prepareSpendingData(transactions: Transaction[], dayCount: number) {
   });
 }
 
-// Custom Tooltip for the Spending Graph
-const SpendingTooltip = ({ active, payload, label }: any) => {
+interface SpendingTooltipProps {
+  active?: boolean;
+  payload?: Array<{ payload: { formattedDate: string; amount: number } }>;
+  label?: string;
+}
+const SpendingTooltip = ({ active, payload }: SpendingTooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
@@ -164,8 +149,11 @@ const SpendingTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-// Custom Tooltip for the Pie Chart
-const PieTooltip = ({ active, payload }: any) => {
+interface PieTooltipProps {
+  active?: boolean;
+  payload?: Array<{ payload: { name: string; value: number; percentage: number } }>;
+}
+const PieTooltip = ({ active, payload }: PieTooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (

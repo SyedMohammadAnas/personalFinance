@@ -123,15 +123,6 @@ export default function ProfileImage({
     };
   }, [src, fallbackDelay, imgError, isLoading]);
 
-  // Function to handle a manual refresh of the image
-  // Not currently exposed in the UI, but available for future use
-  const refreshImage = () => {
-    if (src && src.includes('googleusercontent.com') && !isLoading && !imgError) {
-      setIsLoading(true);
-      setImageUrl(`${src}${src.includes('?') ? '&' : '?'}v=${Date.now()}`);
-    }
-  };
-
   return (
     <div
       className="relative rounded-full overflow-hidden bg-gray-100 flex items-center justify-center"

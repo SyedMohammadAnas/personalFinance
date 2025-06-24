@@ -223,7 +223,7 @@ export async function getValidAccessToken(userId: string): Promise<string | null
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     // Get token data for user
-    const { data: tokenData, error } = await supabase
+    const { data: tokenData } = await supabase
       .from('user_tokens')
       .select('*')
       .eq('user_id', userId)
@@ -296,10 +296,17 @@ export async function getValidAccessToken(userId: string): Promise<string | null
   }
 }
 
+interface UserToken {
+  access_token: string;
+  refresh_token?: string;
+  expiry_date?: number;
+  scope?: string;
+}
+
 /**
  * Helper function to refresh an expired token
  */
-async function refreshToken(userId: string, userToken: any): Promise<string | null> {
+async function refreshToken(userId: string, userToken: UserToken): Promise<string | null> {
   // Token is expired, try to refresh it
   if (!userToken.refresh_token) {
     console.error('No refresh token available for user', userId);
