@@ -45,7 +45,7 @@ function LatestTransactionCard({
 
   if (!transaction) {
     return (
-      <Card className="h-44 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-white overflow-hidden relative">
+      <Card className="h-44 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-white/10 overflow-hidden relative">
         <CardHeader className="pb-1 sm:pb-2">
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-800 flex items-center justify-center mb-1 sm:mb-2">
             <svg
@@ -82,7 +82,7 @@ function LatestTransactionCard({
   }
 
   return (
-    <Card className="h-50 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-white overflow-hidden relative">
+    <Card className="h-50 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-white/10 overflow-hidden relative">
       <CardHeader className="pb-1 sm:pb-2">
         <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-800 flex items-center justify-center mb-1 sm:mb-2">
           <svg
@@ -385,7 +385,7 @@ export default function Dashboard() {
   const renderAccountSettings = () => (
     <div className="grid gap-8 md:gap-10">
       {/* Email Integration Section */}
-        <Card className="bg-white border border-gray-800">
+        <Card className="bg-white/10 border border-gray-800">
         <CardHeader>
           <CardTitle className="text-white">Email Integration</CardTitle>
           <CardDescription className="text-gray-400">
@@ -412,7 +412,7 @@ export default function Dashboard() {
             ) : (
               <Button
                 onClick={() => authorizeGmail()}
-                className="bg-gray-800 hover:bg-gray-700 text-white w-full sm:w-auto"
+                className="bg-white/20 hover:bg-white/30 text-white w-full sm:w-auto"
               >
                 Authorize Gmail Access
               </Button>
@@ -422,7 +422,7 @@ export default function Dashboard() {
       </Card>
 
       {/* Data Management Section */}
-      <Card className="bg-white border border-gray-800">
+      <Card className="bg-white/10 border border-gray-800">
         <CardHeader>
           <CardTitle className="text-white">Data Management</CardTitle>
           <CardDescription className="text-gray-400">
@@ -508,12 +508,10 @@ export default function Dashboard() {
           }
         }
       `}</style>
-      <div className="dashboard-bg absolute inset-0 min-h-screen w-full -z-10" />
-      <div className="absolute inset-0 backdrop-blur-none bg-[#0A0F1A]/15"></div>
 
       {/* Mobile Top Bar - Only visible on small screens */}
       <div className="md:hidden relative z-50">
-        <div className="bg-[#0F172A]/90 backdrop-blur-sm border-b border-gray-800 px-4 py-3 relative">
+        <div className="bg-white/10 backdrop-blur-sm border-b border-gray-800 px-4 py-3 relative">
           <div className="flex items-center justify-between relative">
             {/* Left side - Hamburger menu */}
             <Button
@@ -531,7 +529,7 @@ export default function Dashboard() {
 
             {/* Center - Dynamic title, absolutely centered */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-              <h1 className="text-2xl font-semibold text-white">
+              <h1 className="text-2xl font-semibold text-white text-shadow-[0_1px_2px_rgba(0,0,0,0.)]">
                 {activeView === 'profile'
                   ? 'Profile'
                   : activeView === 'analytics'
@@ -555,7 +553,7 @@ export default function Dashboard() {
 
         {/* Mobile Sidebar */}
         <div className={cn(
-          "fixed left-0 top-0 h-full w-64 bg-[#0F172A]/95 backdrop-blur-sm border-r border-gray-800 z-50 transform transition-transform duration-300 ease-in-out",
+          "fixed left-0 top-0 h-full w-64 bg-white/10 backdrop-blur-sm border-r border-gray-800 z-50 transform transition-transform duration-300 ease-in-out",
           isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}>
           <div className="p-6">
@@ -593,8 +591,8 @@ export default function Dashboard() {
                   className={cn(
                     'flex items-center px-3 py-3 text-gray-400 transition-all hover:text-white rounded-lg w-full',
                     activeView === item.view
-                      ? 'bg-gray-800 text-white'
-                      : 'hover:bg-gray-800'
+                      ? 'bg-white/20 text-white'
+                      : 'hover:bg-white/10'
                   )}
                   onClick={() => item.view && handleNavClick(item.view)}
                 >
@@ -620,11 +618,11 @@ export default function Dashboard() {
 
       {/* Main Container - Adjusted for mobile */}
       <div className="container mx-auto py-4 md:py-8 px-4 relative z-10 mt-0 md:mt-0">
-        <Card className="border border-gray-800 bg-[#0F172A]/80 shadow-md text-white backdrop-blur-none">
+        <Card className="border border-gray-800 bg-white/10 shadow-md text-white backdrop-blur-sm">
           <CardContent className="p-0">
             <div className="flex flex-col md:flex-row">
               {/* Desktop Sidebar - Hidden on mobile */}
-              <div className="hidden md:block w-64 border-r border-gray-800 p-6 bg-[#0F172A]/20 backdrop-blur-none">
+              <div className="hidden md:block w-64 border-r border-gray-800 p-6">
                 {/* User info */}
                 <div className="flex flex-col items-center gap-3 border-b border-gray-800 pb-6">
                   <Avatar className="h-16 w-16">
@@ -677,7 +675,7 @@ export default function Dashboard() {
               </div>
 
               {/* Main Content - Adjusted padding for mobile */}
-              <div className="flex-1 p-4 md:p-6 md:border-l border-gray-800 backdrop-blur-none bg-[#0F172A]/20">
+              <div className="flex-1 p-4 md:p-6 md:border-l border-gray-800">
                 {/* Dashboard View */}
                 {activeView === 'dashboard' && (
                   <>
@@ -736,7 +734,7 @@ export default function Dashboard() {
 
                     <div className="grid gap-6 md:gap-8">
                       {/* Personal Information Card */}
-                      <Card className="bg-[#111827] border border-gray-800">
+                      <Card className="bg-white/10 border border-gray-800">
                         <CardHeader>
                           <CardTitle className="text-white">Personal Information</CardTitle>
                           <CardDescription className="text-gray-400">Your account details from Google login</CardDescription>
@@ -799,8 +797,8 @@ export default function Dashboard() {
                   <div>
                     {/* Main heading and description for settings page */}
                     <div className="mb-6 md:mb-8">
-                      <h2 className="text-2xl md:text-3xl font-bold text-white">Account Settings</h2>
-                      <p className="text-gray-400 text-base md:text-lg">Manage your account preferences and connections</p>
+                      <h2 className="text-2xl md:text-4xl font-bold text-white text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Account Settings</h2>
+                      <p className="text-gray-400 text-base md:text-xl text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Manage your account preferences and connections</p>
                     </div>
                     {/* Render the improved settings layout */}
                     {renderAccountSettings()}
