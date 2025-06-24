@@ -77,7 +77,7 @@ export async function POST() {
       const unixSeconds = Math.floor(lastCheckedTimestamp.getTime() / 1000);
       query += ` after:${unixSeconds}`;
     }
-    let emails = await fetchEmails(gmailClient, 100, query);
+    const emails = await fetchEmails(gmailClient, 100, query);
 
     // No emails found
     if (!emails || emails.length === 0) {

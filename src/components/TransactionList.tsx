@@ -239,7 +239,7 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
   const formatTime = (timeStr: string) => {
     if (!timeStr) return '';
     // Parse timeStr as HH:MM:SS
-    const [hourStr, minuteStr, secondStr] = timeStr.split(':');
+    const [hourStr, minuteStr] = timeStr.split(':');
     let hour = parseInt(hourStr, 10);
     const minute = parseInt(minuteStr, 10);
     const ampm = hour >= 12 ? 'PM' : 'AM';

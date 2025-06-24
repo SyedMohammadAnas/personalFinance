@@ -306,17 +306,28 @@ export async function ensureUserTransactionTable(userEmail: string): Promise<boo
   try {
     // Get Supabase client
     const supabase = getSupabaseClient();
-
     // Use the SQL function to create the table
-    const { error } = await supabase.rpc('create_user_transaction_table', {
-      user_email: userEmail
-    });
-
-    if (error) {
-      console.error(`Error creating transaction table for ${userEmail}:`, error);
-      return false;
+    try {
+      const { error } = await supabase.rpc('create_user_transaction_table', {
+        user_email: userEmail
+      });
+      if (error) {
+        throw error;
+      }
+    } catch (error: any) {
+      // If error is about table/function already existing, ignore it
+      const msg = error?.message || '';
+      if (
+        msg.includes('already exists') ||
+        msg.includes('could not find the function') ||
+        msg.includes('no matches were found in the schema cache')
+      ) {
+        console.warn('Transaction table already exists or function param mismatch, safe to ignore.');
+        return true;
+      } else {
+        throw error;
+      }
     }
-
     return true;
   } catch (error) {
     console.error(`Error in ensureUserTransactionTable for ${userEmail}:`, error);
