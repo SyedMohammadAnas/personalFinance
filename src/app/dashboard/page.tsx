@@ -397,7 +397,7 @@ export default function Dashboard() {
             <Button
               onClick={unlinkGoogleAuth}
               variant="destructive"
-              className="bg-red-800 hover:bg-red-700 w-full sm:w-auto border border-gray-900"
+              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto border border-gray-900 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
             >
               Unlink Google Account
             </Button>
@@ -437,7 +437,7 @@ export default function Dashboard() {
             <Button
               onClick={deleteAllTransactions}
               variant="destructive"
-              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto border border-gray-900"
+              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto border border-gray-900 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
             >
               Delete All Transactions
             </Button>
