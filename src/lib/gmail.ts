@@ -234,13 +234,13 @@ async function getEmailDetails(gmailClient: gmail_v1.Gmail, messageId: string): 
 
     return {
       id: messageId,
-      threadId: message.data.threadId,
-      from: getHeader('from'),
-      to: getHeader('to'),
-      subject: getHeader('subject'),
-      date: getHeader('date'),
-      body: body,
-      rawContent: rawContent
+      threadId: message.data.threadId ?? '',
+      from: getHeader('from') ?? '',
+      to: getHeader('to') ?? '',
+      subject: getHeader('subject') ?? '',
+      date: getHeader('date') ?? '',
+      body: body ?? '',
+      rawContent: rawContent ?? ''
     };
   } catch (error) {
     console.error(`Error getting email details for ${messageId}:`, error);
