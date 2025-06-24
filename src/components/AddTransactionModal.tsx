@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Pencil, Save, ArrowUpRight, ArrowDownLeft, Check, ChevronsUpDown, Tag, Plus } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, Check, ChevronsUpDown, Tag, Plus } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import {
@@ -63,7 +63,7 @@ export default function AddTransactionModal({
   useEffect(() => {
     setDate(todayDate);
     setTime(currentTime);
-  }, [isOpen]);
+  }, [isOpen, todayDate, currentTime]);
 
   // Handle dialog close
   const handleDialogClose = () => {

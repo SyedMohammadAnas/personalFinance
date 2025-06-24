@@ -84,12 +84,6 @@ function LatestTransactionCard({
     );
   }
 
-  const formattedDate = new Date(transaction.date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  });
-
   return (
     <Card className="h-72 p-4 border border-gray-800 rounded-md flex flex-col bg-[#111827]/60 overflow-hidden relative">
       <CardHeader className="pb-2">
@@ -136,66 +130,16 @@ function LatestTransactionCard({
   );
 }
 
-// Define a type for the view names
-type ViewType = 'dashboard' | 'profile' | 'analytics' | 'settings' | null;
-
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [greeting, setGreeting] = useState('');
-  const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [pathname, setPathname] = useState('/dashboard');
   const [activeView, setActiveView] = useState('dashboard');
   const [isCopied, setIsCopied] = useState(false);
   const [latestCredited, setLatestCredited] = useState<Transaction | null>(null);
   const [latestDebited, setLatestDebited] = useState<Transaction | null>(null);
-
-  // Split the effects to avoid dependency array issues
-  useEffect(() => {
-    // Redirect if not authenticated
-    if (status === 'unauthenticated') {
-      router.push('/login');
-    } else if (status === 'authenticated') {
-      setLoading(false);
-
-      // Fetch latest transactions when authenticated
-      if (session?.user?.email) {
-        fetchLatestTransactions();
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, router]);
-
-  // Separate effect for time-related updates
-  useEffect(() => {
-    // Set greeting based on time of day
-    const hour = new Date().getHours();
-    if (hour < 12) setGreeting('Good morning');
-    else if (hour < 18) setGreeting('Good afternoon');
-    else setGreeting('Good evening');
-
-    // Update current time
-    const intervalId = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000);
-
-    return () => clearInterval(intervalId);
-  }, []);
-
-  // Effect for automatic refresh of latest transactions
-  useEffect(() => {
-    if (status === 'authenticated') {
-      // Set up automatic refresh timer for latest transactions
-      const refreshInterval = setInterval(() => {
-        fetchLatestTransactions();
-      }, 30000); // Refresh every 30 seconds
-
-      return () => clearInterval(refreshInterval);
-    }
-  }, [status]);
 
   // Function to fetch latest transactions for external calls (like refresh)
   const fetchLatestTransactions = async () => {
@@ -265,6 +209,41 @@ export default function Dashboard() {
       setLatestDebited(null);
     }
   };
+
+  // Separate effect for time-related updates
+  useEffect(() => {
+    // Update current time
+    const intervalId = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  // Split the effects to avoid dependency array issues
+  useEffect(() => {
+    // Redirect if not authenticated
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    } else if (status === 'authenticated') {
+      // Fetch latest transactions when authenticated
+      if (session?.user?.email) {
+        fetchLatestTransactions();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, router]);
+
+  // Effect for automatic refresh of latest transactions
+  useEffect(() => {
+    if (status === 'authenticated') {
+      // Set up automatic refresh timer for latest transactions
+      const refreshInterval = setInterval(() => {
+        fetchLatestTransactions();
+      }, 30000); // Refresh every 30 seconds
+
+      return () => clearInterval(refreshInterval);
+    }
+  }, [status, fetchLatestTransactions]);
 
   // Function to copy user ID to clipboard
   const copyToClipboard = () => {
@@ -493,7 +472,7 @@ export default function Dashboard() {
     }
   }, []);
 
-  if (loading) {
+  if (status === 'loading') {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
