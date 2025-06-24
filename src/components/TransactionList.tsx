@@ -326,7 +326,10 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
                         )}
                       </div>
                       <div className="ml-3 flex-1 flex items-center justify-between">
-                        <div className="flex-1 text-base">{transaction.name}</div>
+                        <div className="flex flex-col flex-1">
+                          <span className="text-base">{transaction.name}</span>
+                          <span className="text-xs text-gray-400 mt-0.5">{formatDate(transaction.date)}</span>
+                        </div>
                         <div className={`flex flex-row ml-auto ${transaction.transaction_type === 'credited' ? 'text-green-400' : 'text-red-400'} text-base font-semibold`}>
                           {transaction.transaction_type === 'credited' ? '+' : '-'}
                           {formatCurrency(transaction.amount)}
@@ -365,7 +368,10 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
                           )}
                         </div>
                         <div className="ml-3 flex-1 flex items-center justify-between">
-                          <div className="flex-1 text-base">{transaction.name}</div>
+                          <div className="flex flex-col flex-1">
+                            <span className="text-base">{transaction.name}</span>
+                            <span className="text-xs text-gray-400 mt-0.5">{formatDate(transaction.date)}</span>
+                          </div>
                           <div className={`flex flex-row ml-auto ${transaction.transaction_type === 'credited' ? 'text-green-400' : 'text-red-400'} text-base font-semibold`}>
                             {transaction.transaction_type === 'credited' ? '+' : '-'}
                             {formatCurrency(transaction.amount)}
