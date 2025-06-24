@@ -45,8 +45,8 @@ export async function GET(request: Request) {
     // Store the tokens
     const result = await storeTokens(session.user.id, {
       access_token: tokens.access_token!,
-      refresh_token: tokens.refresh_token,
-      expiry_date: tokens.expiry_date,
+      refresh_token: tokens.refresh_token ?? undefined,
+      expiry_date: tokens.expiry_date ?? undefined,
       scope: tokens.scope
     });
 
@@ -108,8 +108,8 @@ export async function POST(request: Request) {
     // Store the tokens
     const result = await storeTokens(session.user.id, {
       access_token: tokens.access_token!,
-      refresh_token: tokens.refresh_token,
-      expiry_date: tokens.expiry_date,
+      refresh_token: tokens.refresh_token ?? undefined,
+      expiry_date: tokens.expiry_date ?? undefined,
       scope: tokens.scope
     });
 
