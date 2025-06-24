@@ -11,8 +11,26 @@ const jetbrainsMono = JetBrains_Mono({
 
 // Metadata for the application
 export const metadata: Metadata = {
-  title: 'Next.js Application with Supabase',
-  description: 'A modern web application using Next.js, NextAuth, and Supabase',
+  title: 'Personal Finance',
+  description: 'Monitor your finances seamlessly with your bank account and manage them to your liking',
+  openGraph: {
+    title: 'Personal Finance',
+    description: 'Monitor your finances seamlessly with your bank account and manage them to your liking',
+    images: [
+      {
+        url: '/personalFinanceLogo.png',
+        width: 512,
+        height: 512,
+        alt: 'Personal Finance Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Personal Finance',
+    description: 'Monitor your finances seamlessly with your bank account and manage them to your liking',
+    images: ['/personalFinanceLogo.png'],
+  },
 };
 
 // Root layout component
@@ -23,6 +41,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/public/personalFinanceLogo.png" type="image/png" />
+      </head>
       <body className={jetbrainsMono.className}>
         <Providers>
           {children}
