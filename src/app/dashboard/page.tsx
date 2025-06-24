@@ -45,7 +45,7 @@ function LatestTransactionCard({
 
   if (!transaction) {
     return (
-      <Card className="h-44 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-white/10 overflow-hidden relative">
+      <Card className="h-44 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-white/10 overflow-hidden relative text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
         <CardHeader className="pb-1 sm:pb-2">
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-800 flex items-center justify-center mb-1 sm:mb-2">
             <svg
@@ -58,7 +58,7 @@ function LatestTransactionCard({
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
+                strokeWidth={5}
                 d={isCredit ? "M19 14l-7 7m0 0l-7-7m7 7V3" : "M5 10l7-7m0 0l7 7m-7-7v18"}
               />
             </svg>
@@ -82,7 +82,7 @@ function LatestTransactionCard({
   }
 
   return (
-    <Card className="h-50 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-white/10 overflow-hidden relative">
+    <Card className="h-50 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-white/10 overflow-hidden relative text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
       <CardHeader className="pb-1 sm:pb-2">
         <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-800 flex items-center justify-center mb-1 sm:mb-2">
           <svg
@@ -95,7 +95,7 @@ function LatestTransactionCard({
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
+              strokeWidth={5}
               d={isCredit ? "M19 14l-7 7m0 0l-7-7m7 7V3" : "M5 10l7-7m0 0l7 7m-7-7v18"}
             />
           </svg>
@@ -437,7 +437,7 @@ export default function Dashboard() {
             <Button
               onClick={deleteAllTransactions}
               variant="destructive"
-              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
+              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto border border-gray-900"
             >
               Delete All Transactions
             </Button>
