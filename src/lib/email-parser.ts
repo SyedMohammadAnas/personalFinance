@@ -314,9 +314,12 @@ export async function ensureUserTransactionTable(userEmail: string): Promise<boo
       if (error) {
         throw error;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      // Type guard for error objects
+      const msg = (typeof error === 'object' && error && 'message' in error && typeof (error as any).message === 'string')
+        ? (error as { message: string }).message
+        : String(error);
       // If error is about table/function already existing, ignore it
-      const msg = error?.message || '';
       if (
         msg.includes('already exists') ||
         msg.includes('could not find the function') ||
