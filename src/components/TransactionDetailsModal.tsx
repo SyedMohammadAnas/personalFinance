@@ -309,57 +309,57 @@ export default function TransactionDetailsModal({
                         {selectedTag === tag && <Check className="h-3.5 w-3.5 mr-2" />}
                         <span className={selectedTag === tag ? 'ml-0' : 'ml-5.5'}>
                           {tag}
-                        </span>
+                </span>
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>
             </div>
+          </div>
 
             {/* Transaction Name - Editable */}
             <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-400">Name:</span>
-                {isEditing ? (
-                  <div className="flex items-center gap-2">
-                    <Input
-                      value={newName}
-                      onChange={(e) => setNewName(e.target.value)}
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-400">Name:</span>
+              {isEditing ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
                       className="h-9 w-[240px] bg-gray-800 border-gray-700 text-gray-200"
-                    />
-                    <Button
-                      size="sm"
-                      onClick={handleSave}
-                      disabled={isSubmitting}
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleSave}
+                    disabled={isSubmitting}
                       className="h-9 px-3 bg-blue-600 hover:bg-blue-700"
-                    >
-                      {isSubmitting ? (
+                  >
+                    {isSubmitting ? (
                         <div className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-1" />
-                      ) : (
+                    ) : (
                         <Save className="h-4 w-4 mr-1" />
-                      )}
+                    )}
                       Save
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
                     <span className="text-sm text-white font-medium">{transaction.name}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setNewName(transaction.name);
-                        setIsEditing(true);
-                      }}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setNewName(transaction.name);
+                      setIsEditing(true);
+                    }}
                       className="h-7 w-7 p-0 hover:bg-gray-800"
-                    >
-                      <Pencil className="h-3.5 w-3.5 text-gray-400" />
-                    </Button>
-                  </div>
-                )}
-              </div>
+                  >
+                    <Pencil className="h-3.5 w-3.5 text-gray-400" />
+                  </Button>
+                </div>
+              )}
             </div>
+          </div>
 
             {/* Transaction ID */}
             <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
@@ -371,7 +371,7 @@ export default function TransactionDetailsModal({
 
             {/* Transaction Type */}
             <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
-              <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-400">Type:</span>
                 <div className="flex items-center">
                   <div className="w-7 h-7 rounded-full bg-gray-800 flex items-center justify-center mr-2">
@@ -430,14 +430,14 @@ export default function TransactionDetailsModal({
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-gray-400 mb-1">Date:</span>
                   <span className="text-sm text-gray-300">{formatDate(transaction.date)}</span>
-                </div>
-              </div>
+            </div>
+          </div>
 
               {/* Time */}
               <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-gray-400 mb-1">Time:</span>
-                  <span className="text-sm text-gray-300">{formatTime(transaction.time)}</span>
+              <span className="text-sm text-gray-300">{formatTime(transaction.time)}</span>
                 </div>
               </div>
             </div>
