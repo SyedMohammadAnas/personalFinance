@@ -5,8 +5,17 @@ import Link from 'next/link';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Suspense } from 'react';
 
 export default function ErrorPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ErrorPageContent />
+    </Suspense>
+  );
+}
+
+function ErrorPageContent() {
   const searchParams = useSearchParams();
   const message = searchParams.get('message') || 'An unexpected error occurred';
 
