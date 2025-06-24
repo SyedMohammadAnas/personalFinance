@@ -15,7 +15,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE() {
   try {
     // Verify user authentication
     const session = await getServerSession();

@@ -10,7 +10,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 export async function GET() {
   try {
     // Get the user session
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions as unknown);
 
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

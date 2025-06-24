@@ -11,12 +11,11 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { createGmailClient, fetchEmails, EmailData } from '@/lib/gmail';
-import { getSupabaseClient } from '@/lib/supabase';
+import { createGmailClient, fetchEmails } from '@/lib/gmail';
 import { getValidAccessToken } from '@/lib/token-manager';
 import { parseEmailContent, storeTransactionData, ensureUserTransactionTable } from '@/lib/email-parser';
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
     // Get the current session to identify the user
     const session = await getServerSession(authOptions);
@@ -65,7 +64,7 @@ export async function POST(request: Request) {
       total: emails.length,
       processed: 0,
       transactionsFound: 0,
-      transactions: [] as any[]
+      transactions: [] as unknown[]
     };
 
     for (const email of emails) {
