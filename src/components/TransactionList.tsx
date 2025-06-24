@@ -22,6 +22,7 @@ import {
 } from './ui/select';
 import TransactionDetailsModal from './TransactionDetailsModal';
 import { AddTransactionButton } from './AddTransactionModal';
+import { Input } from './ui/input';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -53,6 +54,7 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
   const [error, setError] = useState<string | null>(null);
   const [displayCount, setDisplayCount] = useState(4); // Show only 4 items initially
   const [dayFilter, setDayFilter] = useState('7'); // Default to showing 7 days
+  const [searchTerm, setSearchTerm] = useState(''); // State for search input
 
   // State for transaction details modal
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
@@ -248,6 +250,32 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
     return `${hour}:${minute.toString().padStart(2, '0')} ${ampm}`;
   };
 
+  // Filter transactions by search term in addition to day filter
+  useEffect(() => {
+    // First, filter by days
+    let filtered = transactions;
+    if (dayFilter !== 'all') {
+      const daysNum = parseInt(dayFilter);
+      const today = new Date();
+      const cutoffDate = new Date();
+      cutoffDate.setDate(today.getDate() - daysNum);
+      filtered = transactions.filter(transaction => {
+        const transactionDate = new Date(transaction.date);
+        return transactionDate >= cutoffDate;
+      });
+    }
+    // Then, filter by search term
+    if (searchTerm.trim() !== '') {
+      const lowerSearch = searchTerm.toLowerCase();
+      filtered = filtered.filter(transaction =>
+        transaction.name.toLowerCase().includes(lowerSearch) ||
+        transaction.amount.toString().includes(lowerSearch) ||
+        transaction.transaction_type.toLowerCase().includes(lowerSearch)
+      );
+    }
+    setFilteredTransactions(filtered);
+  }, [transactions, dayFilter, searchTerm]);
+
   if (!session) {
     return (
       <Card className="bg-[#111827] border border-gray-800">
@@ -266,13 +294,19 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
   return (
     <>
       <Card className="border border-gray-800 bg-[#111827]/60 shadow-md text-white">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-xl text-white">Recent Transactions</CardTitle>
-          <div className="flex items-center gap-2">
-            <AddTransactionButton onTransactionAdded={refreshTransactions} />
-            <div className="flex items-center bg-gray-800 rounded-md">
+        <CardHeader className="pb-2">
+          {/* Header row: Title left, Add Transaction right */}
+          <div className="flex flex-row items-center justify-between w-full mb-2">
+            <CardTitle className="text-xl text-white mb-0">Recent Transactions</CardTitle>
+            <div className="w-auto">
+              <AddTransactionButton onTransactionAdded={refreshTransactions} />
+            </div>
+          </div>
+          {/* Controls row: Days filter and Refresh grouped together */}
+          <div className="flex flex-row w-full justify-end gap-2">
+            <div className="flex items-center bg-gray-800 rounded-md w-full sm:w-auto max-w-xs">
               <Select value={dayFilter} onValueChange={handleDayFilterChange}>
-                <SelectTrigger className="h-8 min-w-[120px] border-0 bg-transparent focus:ring-0 focus:ring-offset-0">
+                <SelectTrigger className="h-8 min-w-[120px] border-0 bg-transparent focus:ring-0 focus:ring-offset-0 w-full sm:w-auto">
                   <CalendarDays className="h-4 w-4 text-gray-400 mr-2" />
                   <SelectValue placeholder="Filter by days" />
                 </SelectTrigger>
@@ -289,11 +323,22 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
               onClick={refreshTransactions}
               disabled={refreshing}
               size="sm"
-              className="h-8 gap-1 bg-gray-800 hover:bg-gray-700 text-white"
+              className="h-8 gap-1 bg-gray-800 hover:bg-gray-700 text-white w-full sm:w-auto max-w-[120px]"
             >
               <RefreshCcw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               {refreshing ? 'Processing...' : 'Refresh'}
             </Button>
+          </div>
+          {/* Search bar for filtering transactions */}
+          <div className="mt-3">
+            {/* Input from UI library, styled for dark mode */}
+            <Input
+              type="text"
+              placeholder="Search transactions (name, amount, type)"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500"
+            />
           </div>
         </CardHeader>
         <CardContent>

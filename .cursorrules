@@ -32,7 +32,7 @@
 # MUST DO
 - Keep adding comments in the code so that everyone can understand whats going  on
 - Keep committing changes to my repository always
-- give a short description in the commit each time to know whats happening
+- Dont give me pseudo code and start implementing  directly after analysing
 
 # Mistakes
 - Keep using the latest commands, like: npx shadcn@latest
@@ -55,6 +55,7 @@
 10. Added detailed transaction view with editing capabilities
 11. Implemented Google account unlinking functionality
 12. Added transaction deletion functionality
+13. Implemented mobile-responsive dashboard design with expandable sidebar and top navigation bar
 
 ## In Progress
 1. Implement Row Level Security in Supabase for user data

@@ -63,9 +63,7 @@ export default async function ProfilePage() {
             Back to Dashboard
           </Link>
         </Button>
-
-        {/* Page title */}
-        <h1 className="text-3xl font-bold">User Profile</h1>
+        <h1 className="text-2xl font-semibold text-white">Profile</h1>
       </div>
 
       {/* Personal Information Card */}
@@ -81,7 +79,7 @@ export default async function ProfilePage() {
               <ProfileImage
                 src={userData.image}
                 alt={userData.name}
-                size={96}
+                size={100}
               />
 
               {/* Basic user details */}

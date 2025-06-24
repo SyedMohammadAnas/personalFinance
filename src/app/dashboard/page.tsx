@@ -15,6 +15,7 @@ import TransactionAnalytics from '@/components/TransactionAnalytics';
 import ProfileImage from '@/components/ProfileImage';
 import { HomeIcon, LayoutDashboardIcon, UserIcon, BarChartIcon, Settings, Copy, Check, Menu, X } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
+import { signOut } from "next-auth/react";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -46,12 +47,12 @@ function LatestTransactionCard({
 
   if (!transaction) {
     return (
-      <Card className="h-72 p-4 border border-gray-800 rounded-md flex flex-col bg-[#111827]/60 overflow-hidden relative">
-        <CardHeader className="pb-2">
-          <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center mb-2">
+      <Card className="h-44 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-[#111827]/60 overflow-hidden relative">
+        <CardHeader className="pb-1 sm:pb-2">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-800 flex items-center justify-center mb-1 sm:mb-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className={`h-5 w-5 ${isCredit ? 'text-green-400' : 'text-red-400'}`}
+              className={`h-4 w-4 sm:h-5 sm:w-5 ${isCredit ? 'text-green-400' : 'text-red-400'}`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -64,13 +65,13 @@ function LatestTransactionCard({
               />
             </svg>
           </div>
-          <CardTitle className="text-white">
+          <CardTitle className="text-white text-xs sm:text-base">
             {isCredit ? 'Latest Income' : 'Latest Expense'}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mt-2">
-            <div className="text-lg font-bold text-white truncate">
+          <div className="mt-1 sm:mt-2">
+            <div className="text-sm sm:text-lg font-bold text-white truncate">
               No {isCredit ? 'Income' : 'Expense'} Yet
             </div>
             <p className="text-base text-muted-foreground">
@@ -83,12 +84,12 @@ function LatestTransactionCard({
   }
 
   return (
-    <Card className="h-72 p-4 border border-gray-800 rounded-md flex flex-col bg-[#111827]/60 overflow-hidden relative">
-      <CardHeader className="pb-2">
-        <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center mb-2">
+    <Card className="h-50 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-[#111827]/60 overflow-hidden relative">
+      <CardHeader className="pb-1 sm:pb-2">
+        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-800 flex items-center justify-center mb-1 sm:mb-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className={`h-5 w-5 ${isCredit ? 'text-green-400' : 'text-red-400'}`}
+            className={`h-4 w-4 sm:h-5 sm:w-5 ${isCredit ? 'text-green-400' : 'text-red-400'}`}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -101,14 +102,16 @@ function LatestTransactionCard({
             />
           </svg>
         </div>
-        <CardTitle className="text-white">
+        <CardTitle className="text-white text-xs sm:text-base">
           {isCredit ? 'Latest Income' : 'Latest Expense'}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="mt-2">
-          <div className="text-lg font-bold text-white truncate">{transaction.name}</div>
-          <div className="text-base text-gray-400">
+        <div className="mt-1 sm:mt-2">
+          <div className="text-sm sm:text-lg font-bold text-white break-words whitespace-normal">
+            {transaction.name}
+          </div>
+          <div className="text-xs sm:text-base text-gray-400">
             {new Date(transaction.date).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'short',
@@ -119,8 +122,8 @@ function LatestTransactionCard({
           </div>
         </div>
       </CardContent>
-      <div className="absolute bottom-0 right-0 m-4">
-        <div className={`text-xl font-bold ${isCredit ? 'text-green-400' : 'text-red-400'}`}>
+      <div className="absolute bottom-0 right-0 m-2 sm:m-4">
+        <div className={`text-base sm:text-xl font-bold ${isCredit ? 'text-green-400' : 'text-red-400'}`}>
           {isCredit ? '+' : '-'}₹{transaction.amount.toLocaleString('en-IN')}
         </div>
       </div>
@@ -140,6 +143,8 @@ export default function Dashboard() {
   const [latestDebited, setLatestDebited] = useState<Transaction | null>(null);
   // State for mobile sidebar visibility
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  // State to track if Gmail is already linked
+  const [gmailLinked, setGmailLinked] = useState<boolean | null>(null);
 
   // Function to fetch latest transactions for external calls (like refresh)
   const fetchLatestTransactions = useCallback(async () => {
@@ -355,13 +360,34 @@ export default function Dashboard() {
     }
   };
 
-  const renderAccountSettings = () => (
-    <div className="grid gap-6">
-      <div className="space-y-4">
-        <h3 className="text-xl font-medium text-white">Account Settings</h3>
-        <p className="text-sm text-gray-400">Manage your account preferences and connections</p>
-      </div>
+  // Check if Gmail access token exists for the user
+  useEffect(() => {
+    const checkGmailLinked = async () => {
+      if (!session?.user?.id) {
+        setGmailLinked(null);
+        return;
+      }
+      // Query the user_tokens table for this user
+      const { data, error } = await supabase
+        .from('user_tokens')
+        .select('access_token')
+        .eq('user_id', session.user.id)
+        .limit(1);
+      if (error) {
+        console.error('Error checking Gmail token:', error);
+        setGmailLinked(false);
+        return;
+      }
+      setGmailLinked(!!(data && data.length > 0 && data[0].access_token));
+    };
+    if (status === 'authenticated') {
+      checkGmailLinked();
+    }
+  }, [session?.user?.id, status]);
 
+  // Refactored Account Settings rendering for better alignment and no duplicate headings
+  const renderAccountSettings = () => (
+    <div className="grid gap-8 md:gap-10">
       {/* Email Integration Section */}
       <Card className="bg-[#111827] border border-gray-800">
         <CardHeader>
@@ -371,63 +397,30 @@ export default function Dashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <Button
+              onClick={unlinkGoogleAuth}
+              variant="destructive"
+              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
+            >
+              Unlink Google Account
+            </Button>
+            {/* Conditionally render Gmail button based on gmailLinked state */}
+            {gmailLinked === true ? (
               <Button
-                onClick={unlinkGoogleAuth}
-                variant="destructive"
-                className="bg-red-600 hover:bg-red-700"
+                disabled
+                className="w-full sm:w-auto bg-green-700 text-white cursor-not-allowed opacity-80"
               >
-                Unlink Google Account
+                ✅ Gmail already linked
               </Button>
-          </div>
-            <div>
+            ) : (
               <Button
                 onClick={() => authorizeGmail()}
-                className="bg-gray-800 hover:bg-gray-700 text-white"
+                className="bg-gray-800 hover:bg-gray-700 text-white w-full sm:w-auto"
               >
                 Authorize Gmail Access
               </Button>
-        </div>
-      </div>
-        </CardContent>
-      </Card>
-
-      {/* Account Security Section */}
-      <Card className="bg-[#111827] border border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-white">Account Security</CardTitle>
-          <CardDescription className="text-gray-400">
-            Manage your security settings
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-              <Label htmlFor="two-factor" className="text-white">Two-Factor Authentication</Label>
-              <p className="text-sm text-gray-400">
-              Add an extra layer of security to your account
-            </p>
-          </div>
-          <Switch
-            id="two-factor"
-            checked={twoFactorEnabled}
-            onCheckedChange={setTwoFactorEnabled}
-          />
-        </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="email-notifications" className="text-white">Email Notifications</Label>
-              <p className="text-sm text-gray-400">
-                Receive email notifications for account activity
-              </p>
-            </div>
-            <Switch
-              id="email-notifications"
-              checked={notificationsEnabled}
-              onCheckedChange={setNotificationsEnabled}
-            />
+            )}
           </div>
         </CardContent>
       </Card>
@@ -441,24 +434,21 @@ export default function Dashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-400">
-                Delete all transaction data from your account. This action cannot be undone.
-              </p>
-            </div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-gray-400 flex-1">
+              Delete all transaction data from your account. This action cannot be undone.
+            </p>
             <Button
               onClick={deleteAllTransactions}
               variant="destructive"
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
             >
               Delete All Transactions
             </Button>
-      </div>
+          </div>
         </CardContent>
       </Card>
 
-      <Button className="w-full sm:w-auto bg-gray-800 hover:bg-gray-700 text-white">Save Settings</Button>
     </div>
   );
 
@@ -518,29 +508,37 @@ export default function Dashboard() {
       {/* Mobile Top Bar - Only visible on small screens */}
       <div className="md:hidden relative z-50">
         <div className="bg-[#0F172A]/90 backdrop-blur-sm border-b border-gray-800 px-4 py-3 relative">
-          {/* Hamburger */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-white hover:bg-gray-800 p-2 z-10"
-            onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-          >
-            {isMobileSidebarOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </Button>
+          <div className="flex items-center justify-between relative">
+            {/* Left side - Hamburger menu */}
+            <Button
+              variant="ghost"
+              size="lg"
+              className="text-white hover:bg-gray-800 p-2"
+              onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+            >
+              {isMobileSidebarOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </Button>
 
-          {/* Centered Title */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
-          </div>
+            {/* Center - Dynamic title, absolutely centered */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+              <h1 className="text-2xl font-semibold text-white">
+                {activeView === 'profile'
+                  ? 'Profile'
+                  : activeView === 'analytics'
+                  ? 'Analytics'
+                  : 'Dashboard'}
+              </h1>
+            </div>
 
-          {/* Time and Date */}
-          <div className="ml-auto text-right z-10">
-            <p className="text-xl font-semibold text-white">{formatTime(currentTime)}</p>
-            <p className="text-xs text-gray-300">{formatDate(currentTime)}</p>
+            {/* Right side - Time and Date */}
+            <div className="text-right">
+              <p className="text-xl font-semibold text-white">{formatTime(currentTime)}</p>
+              <p className="text-xs text-gray-300">{formatDate(currentTime)}</p>
+            </div>
           </div>
         </div>
 
@@ -557,7 +555,7 @@ export default function Dashboard() {
           <div className="p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-lg font-semibold text-white">Menu</h2>
+              <h2 className="text-2xl font-semibold text-white">Menu</h2>
               <Button
                 variant="ghost"
                 size="sm"
@@ -599,6 +597,17 @@ export default function Dashboard() {
                 </Link>
               ))}
             </nav>
+
+            {/* Sign Out Button - Mobile Sidebar */}
+            <div className="mt-8 mb-2 flex flex-col items-center w-full">
+              <Button
+                onClick={() => signOut({ callbackUrl: '/' })}
+                variant="outline"
+                className="w-full bg-red-900 text-white border-gray-700 hover:bg-gray-800 hover:text-red-400"
+              >
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -647,6 +656,17 @@ export default function Dashboard() {
                       </Link>
                     ))}
                   </nav>
+
+                  {/* Sign Out Button - Desktop Sidebar (below nav links) */}
+                  <div className="mt-8 flex flex-col items-center w-full">
+                    <Button
+                      onClick={() => signOut({ callbackUrl: '/' })}
+                      variant="outline"
+                      className="w-full bg-red-900 text-white border-gray-700 hover:bg-gray-800 hover:text-red-400"
+                    >
+                      Sign Out
+                    </Button>
+                  </div>
                 </div>
               </div>
 
@@ -655,13 +675,29 @@ export default function Dashboard() {
                 {/* Dashboard View */}
                 {activeView === 'dashboard' && (
                   <>
-                    <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2">
-                      {/* Latest Credited Transaction Card */}
+                    {/* Responsive row for Latest Income and Expense cards */}
+                    <div className="flex flex-row gap-2 mb-4 sm:mb-6 w-full md:hidden">
+                      {/* On mobile, show both cards side by side, each taking 50% width */}
+                      <div className="w-1/2">
+                        <LatestTransactionCard
+                          transaction={latestCredited}
+                          type="credited"
+                        />
+                      </div>
+                      <div className="w-1/2">
+                        <LatestTransactionCard
+                          transaction={latestDebited}
+                          type="debited"
+                        />
+                      </div>
+                    </div>
+
+                    {/* On desktop, keep the original grid layout */}
+                    <div className="hidden md:grid gap-4 md:gap-6 grid-cols-2">
                       <LatestTransactionCard
                         transaction={latestCredited}
                         type="credited"
                       />
-                      {/* Latest Debited Transaction Card */}
                       <LatestTransactionCard
                         transaction={latestDebited}
                         type="debited"
@@ -690,8 +726,6 @@ export default function Dashboard() {
                 {activeView === 'profile' && (
                   <div>
                     <div className="mb-4 md:mb-6">
-                      <h2 className="text-xl md:text-2xl font-bold text-white">User Profile</h2>
-                      <p className="text-gray-400">Your account details and preferences</p>
                     </div>
 
                     <div className="grid gap-6 md:gap-8">
@@ -757,14 +791,13 @@ export default function Dashboard() {
                 {/* Settings View */}
                 {activeView === 'settings' && (
                   <div>
-                    <div className="mb-4 md:mb-6">
-                      <h2 className="text-xl md:text-2xl font-bold text-white">Account Settings</h2>
-                      <p className="text-gray-400">Manage your account preferences and connections</p>
+                    {/* Main heading and description for settings page */}
+                    <div className="mb-6 md:mb-8">
+                      <h2 className="text-2xl md:text-3xl font-bold text-white">Account Settings</h2>
+                      <p className="text-gray-400 text-base md:text-lg">Manage your account preferences and connections</p>
                     </div>
-
-                    <div className="grid gap-6 md:gap-8">
-                      {renderAccountSettings()}
-                    </div>
+                    {/* Render the improved settings layout */}
+                    {renderAccountSettings()}
                   </div>
                 )}
               </div>

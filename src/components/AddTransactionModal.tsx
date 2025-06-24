@@ -165,28 +165,16 @@ export default function AddTransactionModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogClose}>
-      <DialogContent className="sm:max-w-lg md:max-w-xl bg-[#111827]/90 backdrop-blur-md border-gray-800">
-        <DialogHeader className="pb-2">
-          <DialogTitle className="flex items-start justify-between text-2xl mb-2 pr-6">
-            <span>Add Transaction</span>
-            <div className="flex items-center mr-6">
-              <div className={`text-base font-medium ${
-                transactionType === 'credited'
-                  ? 'text-green-400'
-                  : 'text-red-400'
-              }`}>
-                {transactionType === 'credited' ? '+' : '-'}
-                {transactionAmount ? `₹${parseFloat(transactionAmount).toFixed(2)}` : '₹0.00'}
-              </div>
-            </div>
-          </DialogTitle>
+      <DialogContent className="max-w-sm w-[95vw] p-2 sm:max-w-lg md:max-w-xl bg-[#111827]/90 backdrop-blur-md border-gray-800">
+        <DialogHeader className="pb-2 pt-3">
+          <DialogTitle className="text-2xl mb-1 pl-5">Add Transaction</DialogTitle>
         </DialogHeader>
 
         <div className="p-4 mt-2 space-y-0 bg-[#0E1525] rounded-lg">
           <div className="flex flex-col gap-5">
-            {/* Tag Dropdown */}
-            <div className="relative right-[10px] px-3 py-2 z-10">
-              <div>
+            {/* Tag Dropdown and Amount - now in a flex row */}
+            <div className="flex flex-row items-center gap-3 px-3 py-2 z-10 justify-between">
+              <div className="flex-1">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -194,7 +182,7 @@ export default function AddTransactionModal({
                       size="sm"
                       className={`h-7 px-2.5 gap-1 border-gray-700 ${selectedTag ? 'text-white' : 'text-gray-400'} hover:bg-gray-800 bg-[#111827] shadow-sm`}
                     >
-                      <Tag className=" h-3.5 w-3.5" />
+                      <Tag className="h-3.5 w-3.5" />
                       {selectedTag || 'Select tag'}
                       <ChevronsUpDown className="h-3.5 w-3.5 ml-1 opacity-50" />
                     </Button>
@@ -214,6 +202,15 @@ export default function AddTransactionModal({
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
+              </div>
+              {/* Amount display beside tag dropdown, right-aligned */}
+              <div className={`text-base font-medium pr-3 ${
+                transactionType === 'credited'
+                  ? 'text-green-400'
+                  : 'text-red-400'
+              }`}>
+                {transactionType === 'credited' ? '+' : '-'}
+                {transactionAmount ? `₹${parseFloat(transactionAmount).toFixed(2)}` : '₹0.00'}
               </div>
             </div>
 
@@ -338,15 +335,18 @@ export default function AddTransactionModal({
           )}
         </div>
 
-        <DialogFooter className="mt-4 flex justify-between items-center">
-          <Button
-            type="button"
-            onClick={handleReset}
-            variant="outline"
-            className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white px-4 py-2"
-          >
-            Reset
-          </Button>
+        {/* Footer: Reset left, Save/Close right */}
+        <DialogFooter className="w-full flex flex-row justify-between items-center mt-4">
+          <div>
+            <Button
+              type="button"
+              onClick={handleReset}
+              variant="outline"
+              className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white px-4 py-2"
+            >
+              Reset
+            </Button>
+          </div>
           <div className="flex gap-3">
             <Button
               type="button"

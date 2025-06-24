@@ -260,34 +260,23 @@ export default function TransactionDetailsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogClose}>
-      <DialogContent className="sm:max-w-lg md:max-w-xl bg-[#111827]/90 backdrop-blur-md border-gray-800">
-        <DialogHeader className="pb-2">
-          <DialogTitle className="flex items-start justify-between text-2xl mb-2 pr-6">
-            <span>Transaction Details</span>
-            <div className="flex items-center mr-6">
-              <div className={`text-base font-medium ${
-                transaction.transaction_type === 'credited'
-                  ? 'text-green-400'
-                  : 'text-red-400'
-              }`}>
-                {transaction.transaction_type === 'credited' ? '+' : '-'}
-                {formatCurrency(transaction.amount)}
-              </div>
-            </div>
-          </DialogTitle>
+      {/* Responsive modal: smaller on mobile, normal on desktop */}
+      <DialogContent className="max-w-sm w-[95vw] p-2 sm:max-w-lg md:max-w-xl bg-[#111827]/90 backdrop-blur-md border-gray-800">
+        <DialogHeader className="pt-3 pb-1">
+          <DialogTitle className="flex items-start text-xl mb-1 pr-2 pl-5">Transaction Details</DialogTitle>
         </DialogHeader>
 
-        <div className="p-4 mt-2 space-y-0 bg-[#0E1525] rounded-lg">
+        <div className="p-4 mt-1 space-y-0 bg-[#0E1525] rounded-lg">
           <div className="flex flex-col gap-5">
-            {/* Tag Dropdown - Repositioned above name field */}
-            <div className="relative right-[10px] px-3 py-2 z-10">
-              <div>
+            {/* Tag Dropdown and Amount - now in a flex row */}
+            <div className="flex flex-row items-center gap-2 px-3 py-2 z-10 justify-between">
+              <div className="flex-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
                       size="sm"
-                      className={`h-7 px-2.5     gap-1 border-gray-700 ${selectedTag ? 'text-white' : 'text-gray-400'} hover:bg-gray-800 bg-[#111827] shadow-sm`}
+                      className={`h-7 px-2.5 gap-1 border-gray-700 ${selectedTag ? 'text-white' : 'text-gray-400'} hover:bg-gray-800 bg-[#111827] shadow-sm`}
                       disabled={isTagUpdating}
                     >
                       {isTagUpdating ? (
@@ -309,13 +298,22 @@ export default function TransactionDetailsModal({
                         {selectedTag === tag && <Check className="h-3.5 w-3.5 mr-2" />}
                         <span className={selectedTag === tag ? 'ml-0' : 'ml-5.5'}>
                           {tag}
-                </span>
+                        </span>
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
+              </div>
+              {/* Amount display beside tag dropdown */}
+              <div className={`text-base font-medium ${
+                transaction.transaction_type === 'credited'
+                  ? 'text-green-400'
+                  : 'text-red-400'
+              }`}>
+                {transaction.transaction_type === 'credited' ? '+' : '-'}
+                {formatCurrency(transaction.amount)}
+              </div>
             </div>
-          </div>
 
             {/* Transaction Name - Editable */}
             <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
