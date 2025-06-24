@@ -2,12 +2,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
-export default function AuthError({
+export default function Page({
   searchParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const error = searchParams.error || "An unknown error occurred";
+  // Handle error param as string or array
+  let error = searchParams.error;
+  if (Array.isArray(error)) {
+    error = error[0];
+  }
+  error = error || "An unknown error occurred";
 
   let errorMessage = "Something went wrong during authentication.";
 
