@@ -47,7 +47,7 @@ function LatestTransactionCard({
     return (
       <Card className="h-44 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-white/10 overflow-hidden relative text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
         <CardHeader className="pb-1 sm:pb-2">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-800 flex items-center justify-center mb-1 sm:mb-2">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white flex items-center justify-center mb-1 sm:mb-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className={`h-4 w-4 sm:h-5 sm:w-5 ${isCredit ? 'text-green-400' : 'text-red-400'}`}
@@ -84,7 +84,7 @@ function LatestTransactionCard({
   return (
     <Card className="h-50 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-white/10 overflow-hidden relative text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
       <CardHeader className="pb-1 sm:pb-2">
-        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-800 flex items-center justify-center mb-1 sm:mb-2">
+        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white flex items-center justify-center mb-1 sm:mb-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className={`h-4 w-4 sm:h-5 sm:w-5 ${isCredit ? 'text-green-400' : 'text-red-400'}`}
