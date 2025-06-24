@@ -9,6 +9,7 @@
 
 import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
+import { gmail_v1 } from 'googleapis';
 
 // Types for email data
 export interface EmailData {
@@ -22,10 +23,20 @@ export interface EmailData {
   rawContent: string;
 }
 
+// Define minimal types for header and part
+interface GmailHeader {
+  name: string;
+  value: string;
+}
+interface GmailPart {
+  mimeType: string;
+  body?: { data?: string };
+}
+
 /**
  * Creates a Gmail API client using OAuth2 credentials
  */
-export async function createGmailClient(accessToken: string): Promise<any> {
+export async function createGmailClient(accessToken: string): Promise<gmail_v1.Gmail> {
   // Create OAuth2 client
   const oAuth2Client = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID,
@@ -46,7 +57,7 @@ export async function createGmailClient(accessToken: string): Promise<any> {
  * Focuses specifically on bank emails
  */
 export async function fetchEmails(
-  gmailClient: any,
+  gmailClient: gmail_v1.Gmail,
   maxResults: number = 100,
   query: string = 'from:hdfc OR from:hdfcbank OR subject:hdfc OR subject:transaction OR subject:payment'
 ): Promise<EmailData[]> {
@@ -176,7 +187,7 @@ function isHdfcBankEmail(email: EmailData): boolean {
 /**
  * Gets detailed information about a specific email
  */
-async function getEmailDetails(gmailClient: any, messageId: string): Promise<EmailData | null> {
+async function getEmailDetails(gmailClient: gmail_v1.Gmail, messageId: string): Promise<EmailData | null> {
   try {
     // Get the full message details
     const message = await gmailClient.users.messages.get({
@@ -185,11 +196,11 @@ async function getEmailDetails(gmailClient: any, messageId: string): Promise<Ema
       format: 'full'
     });
 
-    const headers = message.data.payload.headers;
+    const headers = message.data.payload.headers as GmailHeader[];
 
     // Extract header information
     const getHeader = (name: string) => {
-      const header = headers.find((h: any) => h.name.toLowerCase() === name.toLowerCase());
+      const header = headers.find((h: GmailHeader) => h.name.toLowerCase() === name.toLowerCase());
       return header ? header.value : '';
     };
 
@@ -200,8 +211,8 @@ async function getEmailDetails(gmailClient: any, messageId: string): Promise<Ema
     // Handle different payload structures
     if (message.data.payload.parts && message.data.payload.parts.length > 0) {
       // Get the plain text part if available
-      const textPart = message.data.payload.parts.find(
-        (part: any) => part.mimeType === 'text/plain'
+      const textPart = (message.data.payload.parts as GmailPart[]).find(
+        (part: GmailPart) => part.mimeType === 'text/plain'
       );
 
       if (textPart && textPart.body && textPart.body.data) {

@@ -48,25 +48,8 @@ export type UserData = {
   image_url?: string; // User's profile image URL
 };
 
-/**
- * Validates user data before storage
- * Returns an error message if validation fails, or null if valid
- */
-function validateUserData(user: any): string | null {
-  if (!user) {
-    return 'User object is null or undefined';
-  }
-
-  if (!user.email) {
-    return 'Email is required';
-  }
-
-  if (!user.id) {
-    return 'User ID is required';
-  }
-
-  return null; // Valid
-}
+// (Unused) Validates user data before storage
+// Removed to fix unused variable lint error
 
 /**
  * Stores user data in Supabase after Google authentication
