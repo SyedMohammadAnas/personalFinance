@@ -27,21 +27,30 @@ export async function parseEmailContent(email: EmailData): Promise<TransactionDa
       return null;
     }
 
-    // Parse the email date correctly using proper timezone handling
-    const parsedDate = new Date(email.date);
-
-    // Adjust for potential timezone issues
-    // Email date is in GMT/UTC, convert to local time for India (IST is UTC+5:30)
-    const emailDate = new Date(parsedDate.getTime() + (5.5 * 60 * 60 * 1000));
+    // --- Robust email date parsing for IST time extraction ---
+    let parsedDate: Date;
+    // If the date string contains a timezone offset (e.g., +0530, -0700), parse as-is
+    if (/([+-][0-9]{4})/.test(email.date)) {
+      parsedDate = new Date(email.date); // JS Date will handle the offset
+    } else if (email.date.endsWith('Z')) {
+      // If ends with Z, it's UTC
+      parsedDate = new Date(email.date);
+      // Convert to IST (UTC+5:30)
+      parsedDate = new Date(parsedDate.getTime() + (5.5 * 60 * 60 * 1000));
+    } else {
+      // Fallback: parse as UTC and convert to IST
+      parsedDate = new Date(email.date);
+      parsedDate = new Date(parsedDate.getTime() + (5.5 * 60 * 60 * 1000));
+    }
 
     // Extract time as HH:MM:SS from the adjusted email date for better precision
-    const hours = emailDate.getHours().toString().padStart(2, '0');
-    const minutes = emailDate.getMinutes().toString().padStart(2, '0');
-    const seconds = emailDate.getSeconds().toString().padStart(2, '0');
+    const hours = parsedDate.getHours().toString().padStart(2, '0');
+    const minutes = parsedDate.getMinutes().toString().padStart(2, '0');
+    const seconds = parsedDate.getSeconds().toString().padStart(2, '0');
     const timeStr = `${hours}:${minutes}:${seconds}`;
 
-    console.log(`Processing email from ${email.from} with subject: ${email.subject}, received at: ${emailDate.toISOString()}`);
-    console.log(`Email date converted to IST: ${emailDate.toDateString()} ${timeStr}`);
+    console.log(`Processing email from ${email.from} with subject: ${email.subject}, received at: ${parsedDate.toISOString()}`);
+    console.log(`Email date (IST): ${parsedDate.toDateString()} ${timeStr}`);
 
     // Combine subject and content for better parsing
     const subject = email.subject || '';
@@ -214,7 +223,7 @@ export async function parseEmailContent(email: EmailData): Promise<TransactionDa
       emailId: email.id,
       amount,
       name,
-      date: emailDate,
+      date: parsedDate,
       time: timeStr,
       transactionType
     };
@@ -240,6 +249,21 @@ export async function storeTransactionData(
 
     // Format date as YYYY-MM-DD in IST timezone
     const dateString = transaction.date.toISOString().split('T')[0];
+
+    // --- Prevent duplicate transactions by email_id ---
+    const { data: existing, error: existingError } = await supabase
+      .from(tableName)
+      .select('id')
+      .eq('email_id', transaction.emailId)
+      .limit(1);
+    if (existingError) {
+      console.error(`Error checking for existing transaction for email ${transaction.emailId}:`, existingError);
+    }
+    if (existing && existing.length > 0) {
+      // Duplicate found, skip insert
+      console.log(`Duplicate transaction for email ${transaction.emailId} already exists. Skipping insert.`);
+      return true;
+    }
 
     // Log the transaction data before storing
     console.log(`Storing transaction for user ${userEmail} with email ID ${transaction.emailId}`);

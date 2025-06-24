@@ -12,7 +12,7 @@ export default function Home() {
   const isAuthenticated = status === "authenticated";
 
   return (
-    <div className="flex flex-col min-h-screen relative">
+    <div className="flex flex-col h-screen overflow-hidden relative">
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
         <Image
@@ -84,7 +84,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="flex-grow container mx-auto px-4 py-12 relative z-10">
+      <main className="flex-grow container mx-auto px-4 py-12 relative z-10 overflow-y-auto">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl font-extrabold text-white sm:text-5xl sm:tracking-tight lg:text-6xl">
             Welcome to Personal Finance

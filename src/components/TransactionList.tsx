@@ -12,7 +12,7 @@ import { useSession } from 'next-auth/react';
 import { createClient } from '@supabase/supabase-js';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { RefreshCcw, ArrowUpRight, ArrowDownLeft, CalendarDays } from 'lucide-react';
+import { RefreshCcw, ArrowUpRight, ArrowDownLeft, CalendarDays, Clock } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -235,6 +235,19 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  // Add a helper to format time as HH:MM AM/PM
+  const formatTime = (timeStr: string) => {
+    if (!timeStr) return '';
+    // Parse timeStr as HH:MM:SS
+    const [hourStr, minuteStr, secondStr] = timeStr.split(':');
+    let hour = parseInt(hourStr, 10);
+    const minute = parseInt(minuteStr, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12;
+    if (hour === 0) hour = 12;
+    return `${hour}:${minute.toString().padStart(2, '0')} ${ampm}`;
+  };
+
   if (!session) {
     return (
       <Card className="bg-[#111827] border border-gray-800">
@@ -328,7 +341,16 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
                       <div className="ml-3 flex-1 flex items-center justify-between">
                         <div className="flex flex-col flex-1">
                           <span className="text-base">{transaction.name}</span>
-                          <span className="text-xs text-gray-400 mt-0.5">{formatDate(transaction.date)}</span>
+                          <span className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                            <span>{formatDate(transaction.date)}</span>
+                            {transaction.time && (
+                              <>
+                                <span className="mx-1">•</span>
+                                <Clock className="inline h-3 w-3 text-gray-500" />
+                                <span>{formatTime(transaction.time)}</span>
+                              </>
+                            )}
+                          </span>
                         </div>
                         <div className={`flex flex-row ml-auto ${transaction.transaction_type === 'credited' ? 'text-green-400' : 'text-red-400'} text-base font-semibold`}>
                           {transaction.transaction_type === 'credited' ? '+' : '-'}
@@ -370,7 +392,16 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
                         <div className="ml-3 flex-1 flex items-center justify-between">
                           <div className="flex flex-col flex-1">
                             <span className="text-base">{transaction.name}</span>
-                            <span className="text-xs text-gray-400 mt-0.5">{formatDate(transaction.date)}</span>
+                            <span className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                              <span>{formatDate(transaction.date)}</span>
+                              {transaction.time && (
+                                <>
+                                  <span className="mx-1">•</span>
+                                  <Clock className="inline h-3 w-3 text-gray-500" />
+                                  <span>{formatTime(transaction.time)}</span>
+                                </>
+                              )}
+                            </span>
                           </div>
                           <div className={`flex flex-row ml-auto ${transaction.transaction_type === 'credited' ? 'text-green-400' : 'text-red-400'} text-base font-semibold`}>
                             {transaction.transaction_type === 'credited' ? '+' : '-'}
