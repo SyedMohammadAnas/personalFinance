@@ -197,7 +197,7 @@ async function getEmailDetails(gmailClient: gmail_v1.Gmail, messageId: string): 
       format: 'full'
     });
 
-    const headers = message.data.payload.headers as GmailHeader[];
+    const headers = (message.data.payload && message.data.payload.headers ? message.data.payload.headers : []) as GmailHeader[];
 
     // Extract header information
     const getHeader = (name: string) => {
