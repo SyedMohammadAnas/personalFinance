@@ -7,8 +7,6 @@ import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Label } from '@/components/ui/label';
-import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import TransactionList from '@/components/TransactionList';
 import TransactionAnalytics from '@/components/TransactionAnalytics';
@@ -135,8 +133,6 @@ export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [activeView, setActiveView] = useState('dashboard');
   const [isCopied, setIsCopied] = useState(false);
   const [latestCredited, setLatestCredited] = useState<Transaction | null>(null);
@@ -496,13 +492,23 @@ export default function Dashboard() {
     <div
       className="min-h-screen w-full relative overflow-hidden"
       style={{
-        backgroundImage: "url('/images/TopoBackground.jpg')",
+        backgroundImage: `url('/images/TopoBackground.jpg')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
         backgroundAttachment: "fixed"
       }}
     >
+      {/* Responsive background image for mobile view */}
+      <style jsx global>{`
+        @media (max-width: 768px) {
+          .dashboard-bg {
+            background-image: url('/images/mobileBackground.jpg') !important;
+            background-attachment: scroll !important;
+          }
+        }
+      `}</style>
+      <div className="dashboard-bg absolute inset-0 min-h-screen w-full -z-10" />
       <div className="absolute inset-0 backdrop-blur-none bg-[#0A0F1A]/15"></div>
 
       {/* Mobile Top Bar - Only visible on small screens */}
