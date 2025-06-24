@@ -285,7 +285,7 @@ export default function TransactionAnalytics() {
     <div className="w-full space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Income Card */}
-        <Card className="bg-white/10 border border-gray-800">
+        <Card className="bg-white/10 border border-gray-800 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
           <CardHeader className="pb-2">
             <div className="w-10 h-10 rounded-full bg-green-900/30 flex items-center justify-center mb-2">
               <svg
@@ -318,7 +318,7 @@ export default function TransactionAnalytics() {
         </Card>
 
         {/* Expenses Card */}
-        <Card className="bg-white/10 border border-gray-800">
+        <Card className="bg-white/10 border border-gray-800 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
           <CardHeader className="pb-2">
             <div className="w-10 h-10 rounded-full bg-red-900/30 flex items-center justify-center mb-2">
               <svg
@@ -352,7 +352,7 @@ export default function TransactionAnalytics() {
       </div>
 
       {/* Spending Line Graph with Recharts */}
-      <Card className="bg-white/10 border border-gray-800">
+      <Card className="bg-white/10 border border-gray-800 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-white text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Spending Over Time</CardTitle>
@@ -447,7 +447,7 @@ export default function TransactionAnalytics() {
       </Card>
 
       {/* Transaction Type Distribution - Pie Chart */}
-      <Card className="bg-white/10 border border-gray-800">
+      <Card className="bg-white/10 border border-gray-800 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
         <CardHeader>
           <CardTitle className="text-white text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Transaction Distribution</CardTitle>
           <CardDescription className="text-gray-400">

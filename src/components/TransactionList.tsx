@@ -278,7 +278,7 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
 
   if (!session) {
     return (
-      <Card className="bg-white/10 border border-gray-800">
+      <Card className="bg-white/10 border border-gray-800 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
         <CardHeader>
           <CardTitle className="text-white">Recent Transactions</CardTitle>
         </CardHeader>
@@ -293,7 +293,7 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
 
   return (
     <>
-      <Card className="border border-gray-800 bg-white/10 shadow-md text-white">
+      <Card className="border border-gray-800 bg-white/10 shadow-md text-white text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
         <CardHeader className="pb-2">
           {/* Header row: Title left, Add Transaction right */}
           <div className="flex flex-row items-center justify-between w-full mb-2">
@@ -304,13 +304,13 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
           </div>
           {/* Controls row: Days filter and Refresh grouped together */}
           <div className="flex flex-row w-full justify-end gap-2">
-            <div className="flex items-center bg-gray-800 rounded-md w-full sm:w-auto max-w-xs">
+            <div className="flex items-center bg-white/10 rounded-md w-full sm:w-auto max-w-xs ">
               <Select value={dayFilter} onValueChange={handleDayFilterChange}>
                 <SelectTrigger className="h-8 min-w-[120px] border-0 bg-white/20 focus:ring-0 focus:ring-offset-0 w-full sm:w-auto">
                   <CalendarDays className="h-4 w-4 text-gray-400 mr-2" />
                   <SelectValue placeholder="Filter by days" />
                 </SelectTrigger>
-                <SelectContent align="center" className="min-w-[150px]">
+                <SelectContent align="center" className="min-w-[150px] text-shadow-[0_1px_2px_rgba(0,0,0,0.8)] bg-white/10 border border-gray-900">
                   <SelectItem value="7">7 days</SelectItem>
                   <SelectItem value="10">10 days</SelectItem>
                   <SelectItem value="15">15 days</SelectItem>
@@ -323,7 +323,7 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
               onClick={refreshTransactions}
               disabled={refreshing}
               size="sm"
-              className="h-8 gap-1 bg-white/20 hover:bg-white/30 text-white w-full sm:w-auto max-w-[120px]"
+              className="h-8 gap-1 bg-white/20 hover:bg-white/30 text-white w-full sm:w-auto max-w-[120px] text-shadow-[0_1px_2px_rgba(0,0,0,0.8)] border border-gray-900"
             >
               <RefreshCcw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               {refreshing ? 'Processing...' : 'Refresh'}
@@ -337,7 +337,7 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
               placeholder="Search transactions (name, amount, type)"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="bg-white/20 border-gray-700 text-white placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500"
+              className="bg-white/20 border-gray-700 text-white placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)] border border-gray-900"
             />
           </div>
         </CardHeader>
@@ -373,31 +373,31 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
                   {filteredTransactions.slice(0, displayCount).map((transaction) => (
                     <div
                       key={transaction.id}
-                      className="flex items-center border-b border-gray-800 pb-3 last:border-0 last:pb-0 cursor-pointer hover:bg-gray-800/30 rounded-md p-2 transition-colors"
+                      className="flex items-center border-b border-gray-800 pb-3 last:border-0 last:pb-0 cursor-pointer hover:bg-white/10 rounded-md p-2 transition-colors text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
                       onClick={() => openTransactionDetails(transaction)}
                     >
-                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
                         {transaction.transaction_type === 'credited' ? (
-                          <ArrowDownLeft className="h-5 w-5 text-green-400" />
+                          <ArrowDownLeft className="h-5 w-5 text-green-400 stroke-[5] text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
                         ) : (
-                          <ArrowUpRight className="h-5 w-5 text-red-400" />
+                          <ArrowUpRight className="h-5 w-5 text-red-400 stroke-[5] text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
                         )}
                       </div>
                       <div className="ml-3 flex-1 flex items-center justify-between">
                         <div className="flex flex-col flex-1">
                           <span className="text-base">{transaction.name}</span>
-                          <span className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                          <span className="text-xs text-gray-400 mt-0.5 flex items-center gap-1 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                             <span>{formatDate(transaction.date)}</span>
                             {transaction.time && (
                               <>
                                 <span className="mx-1">•</span>
-                                <Clock className="inline h-3 w-3 text-gray-500" />
+                                <Clock className="inline h-3 w-3 text-gray-500 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
                                 <span>{formatTime(transaction.time)}</span>
                               </>
                             )}
                           </span>
                         </div>
-                        <div className={`flex flex-row ml-auto ${transaction.transaction_type === 'credited' ? 'text-green-400' : 'text-red-400'} text-base font-semibold`}>
+                        <div className={`flex flex-row ml-auto ${transaction.transaction_type === 'credited' ? 'text-green-400' : 'text-red-400'} text-base font-semibold text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]`}>
                           {transaction.transaction_type === 'credited' ? '+' : '-'}
                           {formatCurrency(transaction.amount)}
                         </div>
@@ -420,7 +420,7 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
               ) : (
                 <>
                   {/* Scrollable transaction list */}
-                  <div className="max-h-80 overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-gray-700">
+                  <div className="max-h-80 overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-gray-700 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                     {filteredTransactions.map((transaction) => (
                       <div
                         key={transaction.id}
@@ -436,19 +436,19 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
                         </div>
                         <div className="ml-3 flex-1 flex items-center justify-between">
                           <div className="flex flex-col flex-1">
-                            <span className="text-base">{transaction.name}</span>
-                            <span className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                            <span className="text-base text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{transaction.name}</span>
+                            <span className="text-xs text-gray-400 mt-0.5 flex items-center gap-1 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                               <span>{formatDate(transaction.date)}</span>
                               {transaction.time && (
                                 <>
                                   <span className="mx-1">•</span>
-                                  <Clock className="inline h-3 w-3 text-gray-500" />
+                                  <Clock className="inline h-3 w-3 text-gray-500 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
                                   <span>{formatTime(transaction.time)}</span>
                                 </>
                               )}
                             </span>
                           </div>
-                          <div className={`flex flex-row ml-auto ${transaction.transaction_type === 'credited' ? 'text-green-400' : 'text-red-400'} text-base font-semibold`}>
+                          <div className={`flex flex-row ml-auto ${transaction.transaction_type === 'credited' ? 'text-green-400' : 'text-red-400'} text-base font-semibold text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]`}>
                             {transaction.transaction_type === 'credited' ? '+' : '-'}
                             {formatCurrency(transaction.amount)}
                           </div>
@@ -461,7 +461,7 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full mt-4 text-blue-400 hover:text-blue-300 hover:bg-gray-800"
+                    className="w-full mt-4 text-blue-400 hover:text-blue-300 hover:bg-gray-800 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
                     onClick={() => setDisplayCount(4)}
                   >
                     Show Less

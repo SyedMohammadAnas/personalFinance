@@ -26,7 +26,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-[#0A0F1A]/40" /> {/* Dark overlay for better readability */}
       </div>
 
-      <header className="border-b border-gray-800/40 bg-[#0A0F1A]/30 backdrop-blur-md shadow-lg sticky top-0 z-10">
+      <header className="bg-white/10 backdrop-blur-sm shadow-lg sticky top-0 z-10 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <Image
@@ -66,7 +66,7 @@ export default function Home() {
                   onClick={() => signOut({ callbackUrl: '/' })}
                   variant="outline"
                   size="sm"
-                  className="flex items-center gap-2 border-gray-500 text-gray-200 hover:bg-gray-800/60"
+                  className="flex items-center gap-2 bg-red-500 border-gray-500 text-gray-200 hover:bg-gray-800/60"
                 >
                   <LogOut className="h-4 w-4" />
                   <span>Sign out</span>
@@ -86,17 +86,17 @@ export default function Home() {
 
       <main className="flex-grow container mx-auto px-4 py-12 relative z-10 overflow-y-auto">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl font-extrabold text-white sm:text-5xl sm:tracking-tight lg:text-6xl">
+          <h1 className="text-4xl font-extrabold text-white sm:text-5xl sm:tracking-tight lg:text-6xl drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">
             Welcome to Personal Finance
           </h1>
-          <p className="mt-6 text-xl text-gray-200">
+          <p className="mt-12 text-xl text-gray-200">
             A financial app to ease your needs
           </p>
 
           {isAuthenticated ? (
-            <div className="mt-12 p-8 bg-[#111827]/80 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700">
-              <h2 className="text-2xl font-bold text-white">Hello, {session?.user?.name || 'User'}!</h2>
-              <p className="mt-4 text-gray-200">
+            <div className="mt-12 p-8 bg-white/10 rounded-lg shadow-lg">
+              <h2 className="text-2xl font-bold text-white text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Hello, {session?.user?.name || 'User'}!</h2>
+              <p className="mt-4 text-white text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                 You are now signed in with your Google account. You can access all the features of our application.
               </p>
               <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -104,9 +104,9 @@ export default function Home() {
                   href="/profile"
                   className="block transition-transform hover:scale-105 hover:shadow-md"
                 >
-                  <div className="p-4 bg-[#1E293B]/80 backdrop-blur-sm rounded-lg cursor-pointer">
-                    <h3 className="font-semibold text-indigo-400">Profile</h3>
-                    <p className="mt-2 text-sm text-gray-200">
+                  <div className="p-4 bg-white/10 backdrop-blur-sm rounded-lg cursor-pointer">
+                    <h3 className="text-2xl font-extrabold text-blue-900 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Profile</h3>
+                    <p className="mt-2 text-sm text-gray-200 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                       View and edit your profile information
                     </p>
                   </div>
@@ -115,9 +115,9 @@ export default function Home() {
                   href="/dashboard"
                   className="block transition-transform hover:scale-105 hover:shadow-md"
                 >
-                  <div className="p-4 bg-[#1E293B]/80 backdrop-blur-sm rounded-lg cursor-pointer">
-                    <h3 className="font-semibold text-indigo-400">Dashboard</h3>
-                    <p className="mt-2 text-sm text-gray-200">
+                  <div className="p-4 bg-white/10 backdrop-blur-sm rounded-lg cursor-pointer">
+                    <h3 className="text-2xl font-extrabold text-blue-900 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Dashboard</h3>
+                    <p className="mt-2 text-sm text-gray-200 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                       Access your personalized dashboard
                     </p>
                   </div>

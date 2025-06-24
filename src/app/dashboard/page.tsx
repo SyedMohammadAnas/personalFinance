@@ -47,7 +47,7 @@ function LatestTransactionCard({
     return (
       <Card className="h-44 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-white/10 overflow-hidden relative text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
         <CardHeader className="pb-1 sm:pb-2">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white flex items-center justify-center mb-1 sm:mb-2">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center mb-1 sm:mb-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className={`h-4 w-4 sm:h-5 sm:w-5 ${isCredit ? 'text-green-400' : 'text-red-400'}`}
@@ -84,7 +84,7 @@ function LatestTransactionCard({
   return (
     <Card className="h-50 p-2 sm:p-4 border border-gray-800 rounded-md flex flex-col bg-white/10 overflow-hidden relative text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
       <CardHeader className="pb-1 sm:pb-2">
-        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white flex items-center justify-center mb-1 sm:mb-2">
+        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center mb-1 sm:mb-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className={`h-4 w-4 sm:h-5 sm:w-5 ${isCredit ? 'text-green-400' : 'text-red-400'}`}
@@ -385,7 +385,7 @@ export default function Dashboard() {
   const renderAccountSettings = () => (
     <div className="grid gap-8 md:gap-10">
       {/* Email Integration Section */}
-        <Card className="bg-white/10 border border-gray-800">
+        <Card className="bg-white/10 border border-gray-800 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
         <CardHeader>
           <CardTitle className="text-white">Email Integration</CardTitle>
           <CardDescription className="text-gray-400">
@@ -422,7 +422,7 @@ export default function Dashboard() {
       </Card>
 
       {/* Data Management Section */}
-      <Card className="bg-white/10 border border-gray-800">
+      <Card className="bg-white/10 border border-gray-800 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
         <CardHeader>
           <CardTitle className="text-white">Data Management</CardTitle>
           <CardDescription className="text-gray-400">
@@ -517,7 +517,7 @@ export default function Dashboard() {
             <Button
               variant="ghost"
               size="lg"
-              className="text-white hover:bg-gray-800 p-2"
+              className="text-white hover:bg-gray-800 p-2 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
               onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
             >
               {isMobileSidebarOpen ? (
@@ -539,7 +539,7 @@ export default function Dashboard() {
             </div>
 
             {/* Right side - Time and Date */}
-            <div className="text-right">
+            <div className="text-right text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
               <p className="text-xl font-semibold text-white">{formatTime(currentTime)}</p>
               <p className="text-xs text-gray-300">{formatDate(currentTime)}</p>
             </div>
@@ -559,11 +559,11 @@ export default function Dashboard() {
           <div className="p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-semibold text-white">Menu</h2>
+              <h2 className="text-2xl font-semibold text-white text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Menu</h2>
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-white hover:bg-gray-800 p-1"
+                className="text-white hover:bg-gray-800 p-1 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
                 onClick={() => setIsMobileSidebarOpen(false)}
               >
                 <X className="h-5 w-5" />
@@ -577,8 +577,8 @@ export default function Dashboard() {
                 <AvatarFallback className="bg-gray-700 text-lg">{session?.user?.name?.charAt(0) || 'U'}</AvatarFallback>
               </Avatar>
               <div className="text-center">
-                <p className="text-lg font-medium text-white">{session?.user?.name}</p>
-                <p className="text-sm text-gray-400">{session?.user?.email}</p>
+                <p className="text-lg font-medium text-white text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{session?.user?.name}</p>
+                <p className="text-sm text-gray-400 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{session?.user?.email}</p>
               </div>
             </div>
 
@@ -589,7 +589,7 @@ export default function Dashboard() {
                   key={item.name}
                   href={item.view ? '#' : item.href}
                   className={cn(
-                    'flex items-center px-3 py-3 text-gray-400 transition-all hover:text-white rounded-lg w-full',
+                    'flex items-center px-3 py-3 text-gray-400 transition-all hover:text-white rounded-lg w-full text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]',
                     activeView === item.view
                       ? 'bg-white/20 text-white'
                       : 'hover:bg-white/10'
@@ -607,7 +607,7 @@ export default function Dashboard() {
               <Button
                 onClick={() => signOut({ callbackUrl: '/' })}
                 variant="outline"
-                className="w-full bg-red-900 text-white border-gray-700 hover:bg-gray-800 hover:text-red-400"
+                className="w-full bg-red-900 text-white border-gray-700 hover:bg-gray-800 hover:text-red-400 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
               >
                 Sign Out
               </Button>
@@ -630,14 +630,14 @@ export default function Dashboard() {
                     <AvatarFallback className="bg-gray-700 text-lg">{session?.user?.name?.charAt(0) || 'U'}</AvatarFallback>
                   </Avatar>
                   <div className="text-center">
-                    <p className="text-lg font-medium text-white">{session?.user?.name}</p>
+                    <p className="text-lg font-medium text-white text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{session?.user?.name}</p>
                   </div>
                 </div>
 
                 {/* Date and time */}
                 <div className="mt-6 border-b border-gray-800 pb-6 text-center">
-                  <p className="text-lg text-gray-400">{formatDate(currentTime)}</p>
-                  <p className="text-4xl font-bold text-white mt-1">{formatTime(currentTime)}</p>
+                  <p className="text-lg text-gray-400 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{formatDate(currentTime)}</p>
+                  <p className="text-4xl font-bold text-white mt-1 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{formatTime(currentTime)}</p>
                 </div>
 
                 {/* Navigation Links - centered with flex */}
@@ -648,7 +648,7 @@ export default function Dashboard() {
                         key={item.name}
                         href={item.view ? '#' : item.href}
                         className={cn(
-                          'flex items-center px-3 py-2 text-gray-400 transition-all hover:text-white rounded-lg',
+                          'flex items-center px-3 py-2 text-gray-400 transition-all hover:text-white rounded-lg text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]',
                           activeView === item.view
                             ? 'bg-white/20 text-white'
                             : 'hover:bg-white/10'
@@ -666,7 +666,7 @@ export default function Dashboard() {
                     <Button
                       onClick={() => signOut({ callbackUrl: '/' })}
                       variant="outline"
-                      className="w-full bg-red-900 text-white border-gray-700 hover:bg-gray-800 hover:text-red-400"
+                      className="w-full bg-red-900 text-white border-gray-700 hover:bg-gray-800 hover:text-red-400 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
                     >
                       Sign Out
                     </Button>
@@ -734,7 +734,7 @@ export default function Dashboard() {
 
                     <div className="grid gap-6 md:gap-8">
                       {/* Personal Information Card */}
-                      <Card className="bg-white/10 border border-gray-800">
+                      <Card className="bg-white/10 border border-gray-800 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                         <CardHeader>
                           <CardTitle className="text-white">Personal Information</CardTitle>
                           <CardDescription className="text-gray-400">Your account details from Google login</CardDescription>
@@ -767,13 +767,13 @@ export default function Dashboard() {
                               <div>
                                 <label className="text-sm text-gray-400">User ID</label>
                                 <div className="flex items-center space-x-2 mt-1">
-                                  <code className="bg-gray-800 px-2 py-1 rounded text-xs text-gray-300 flex-1 truncate">
+                                  <code className="bg-gray-800 px-2 py-1 rounded text-xs text-gray-300 flex-1 truncate text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                                     {session?.user?.id || 'No ID available'}
                                   </code>
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="h-8 px-2 border-gray-700 bg-gray-800 hover:bg-gray-700 flex-shrink-0"
+                                    className="h-8 px-2 border-gray-700 bg-gray-800 hover:bg-gray-700 flex-shrink-0 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
                                     onClick={copyToClipboard}
                                   >
                                     {isCopied ? (
