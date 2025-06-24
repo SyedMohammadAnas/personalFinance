@@ -44,8 +44,12 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/personalFinanceLogo.png" type="image/png" />
         <link rel="manifest" href="/manifest.json" />
+        {/* Ensures the status bar is transparent and overlays your app on iOS */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        {/* Set theme color to transparent for iOS Safari */}
+        <meta name="theme-color" content="rgba(0,0,0,0)" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content="rgba(255,255,255,0)" media="(prefers-color-scheme: light)" />
         <meta name="apple-mobile-web-app-title" content="Personal Finance" />
         <link rel="apple-touch-icon" href="/personalFinanceLogo-180.png" />
       </head>

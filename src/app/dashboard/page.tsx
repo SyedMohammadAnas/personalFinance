@@ -511,7 +511,14 @@ export default function Dashboard() {
 
       {/* Mobile Top Bar - Only visible on small screens */}
       <div className="md:hidden relative z-50">
-        <div className="bg-white/10 backdrop-blur-sm border-b border-gray-800 px-4 py-3 relative">
+        {/*
+          On iOS Safari, the status bar area can overlap the top bar. We use 'env(safe-area-inset-top)'
+          to add padding so the content is not hidden, and ensure the blur/background extends to the very top.
+        */}
+        <div
+          className="bg-white/10 backdrop-blur-sm border-b border-gray-800 px-4 py-3 relative"
+          style={{ paddingTop: 'env(safe-area-inset-top)' }}
+        >
           <div className="flex items-center justify-between relative">
             {/* Left side - Hamburger menu */}
             <Button
