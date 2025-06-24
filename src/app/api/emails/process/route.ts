@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     let params;
     try {
       params = await request.json();
-    } catch (e) {
+    } catch {
       params = {};
     }
 

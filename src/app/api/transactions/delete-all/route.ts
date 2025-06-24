@@ -4,7 +4,7 @@
  * This API endpoint handles deleting all transactions from a user's transaction table
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { createClient } from '@supabase/supabase-js';
 
