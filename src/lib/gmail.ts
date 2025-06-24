@@ -78,6 +78,7 @@ export async function fetchEmails(
 
     // Fetch full details for each message
     for (const message of messages) {
+      if (!message.id) continue; // Skip if id is null or undefined
       try {
         const emailData = await getEmailDetails(gmailClient, message.id);
         if (emailData) {
