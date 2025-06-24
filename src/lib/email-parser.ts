@@ -315,9 +315,9 @@ export async function ensureUserTransactionTable(userEmail: string): Promise<boo
         throw error;
       }
     } catch (error: unknown) {
-      // Type guard for error objects
-      const msg = (typeof error === 'object' && error && 'message' in error && typeof (error as any).message === 'string')
-        ? (error as { message: string }).message
+      // Use type guard to safely access error.message
+      const msg = isErrorWithMessage(error)
+        ? error.message
         : String(error);
       // If error is about table/function already existing, ignore it
       if (
@@ -336,6 +336,16 @@ export async function ensureUserTransactionTable(userEmail: string): Promise<boo
     console.error(`Error in ensureUserTransactionTable for ${userEmail}:`, error);
     return false;
   }
+}
+
+// Type guard to check if an error has a string message property
+function isErrorWithMessage(error: unknown): error is { message: string } {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as Record<string, unknown>).message === 'string'
+  );
 }
 
 /**
