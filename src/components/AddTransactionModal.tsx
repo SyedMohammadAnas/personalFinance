@@ -384,7 +384,7 @@ export function AddTransactionButton({ onTransactionAdded }: { onTransactionAdde
         variant="outline"
         size="sm"
         onClick={() => setIsAddModalOpen(true)}
-        className="h-8 px-3 gap-1 border-gray-700 text-white hover:bg-gray-800 bg-[#111827]"
+        className="h-8 px-3 gap-1 border-gray-700 text-white bg-white/20 hover:bg-white/30"
       >
         <Plus className="h-3.5 w-3.5 mr-1" />
         Add Transaction

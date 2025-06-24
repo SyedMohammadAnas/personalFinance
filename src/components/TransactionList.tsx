@@ -278,7 +278,7 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
 
   if (!session) {
     return (
-      <Card className="bg-[#111827] border border-gray-800">
+      <Card className="bg-white/10 border border-gray-800">
         <CardHeader>
           <CardTitle className="text-white">Recent Transactions</CardTitle>
         </CardHeader>
@@ -293,7 +293,7 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
 
   return (
     <>
-      <Card className="border border-gray-800 bg-[#111827]/60 shadow-md text-white">
+      <Card className="border border-gray-800 bg-white/10 shadow-md text-white">
         <CardHeader className="pb-2">
           {/* Header row: Title left, Add Transaction right */}
           <div className="flex flex-row items-center justify-between w-full mb-2">
@@ -306,7 +306,7 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
           <div className="flex flex-row w-full justify-end gap-2">
             <div className="flex items-center bg-gray-800 rounded-md w-full sm:w-auto max-w-xs">
               <Select value={dayFilter} onValueChange={handleDayFilterChange}>
-                <SelectTrigger className="h-8 min-w-[120px] border-0 bg-transparent focus:ring-0 focus:ring-offset-0 w-full sm:w-auto">
+                <SelectTrigger className="h-8 min-w-[120px] border-0 bg-white/20 focus:ring-0 focus:ring-offset-0 w-full sm:w-auto">
                   <CalendarDays className="h-4 w-4 text-gray-400 mr-2" />
                   <SelectValue placeholder="Filter by days" />
                 </SelectTrigger>
@@ -323,7 +323,7 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
               onClick={refreshTransactions}
               disabled={refreshing}
               size="sm"
-              className="h-8 gap-1 bg-gray-800 hover:bg-gray-700 text-white w-full sm:w-auto max-w-[120px]"
+              className="h-8 gap-1 bg-white/20 hover:bg-white/30 text-white w-full sm:w-auto max-w-[120px]"
             >
               <RefreshCcw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               {refreshing ? 'Processing...' : 'Refresh'}
@@ -337,7 +337,7 @@ export default function TransactionList({ onTransactionsUpdated }: TransactionLi
               placeholder="Search transactions (name, amount, type)"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500"
+              className="bg-white/20 border-gray-700 text-white placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </CardHeader>
