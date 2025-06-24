@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Link from "next/link";
 
 // Main error page component for authentication errors
-export default function Page({ searchParams }: any) {
+export default function Page({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
   // Handle error param as string or array
   let error = searchParams.error;
   if (Array.isArray(error)) {
