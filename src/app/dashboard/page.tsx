@@ -517,38 +517,30 @@ export default function Dashboard() {
 
       {/* Mobile Top Bar - Only visible on small screens */}
       <div className="md:hidden relative z-50">
-        <div className="bg-[#0F172A]/90 backdrop-blur-sm border-b border-gray-800 px-4 py-3">
-          <div className="flex items-center justify-between">
-            {/* Left side - Hamburger menu */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-gray-800 p-2"
-              onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-            >
-              {isMobileSidebarOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </Button>
+        <div className="bg-[#0F172A]/90 backdrop-blur-sm border-b border-gray-800 px-4 py-3 relative">
+          {/* Hamburger */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-white hover:bg-gray-800 p-2 z-10"
+            onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+          >
+            {isMobileSidebarOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
+          </Button>
 
-            {/* Center - Profile info */}
-            <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={session?.user?.image || ''} alt={session?.user?.name || 'User'} />
-                <AvatarFallback className="bg-gray-700 text-sm">{session?.user?.name?.charAt(0) || 'U'}</AvatarFallback>
-              </Avatar>
-              <div className="text-center">
-                <p className="text-sm font-medium text-white truncate max-w-24">{session?.user?.name}</p>
-              </div>
-            </div>
+          {/* Centered Title */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
+          </div>
 
-            {/* Right side - Time and Date */}
-            <div className="text-right">
-              <p className="text-xs text-gray-300">{formatDate(currentTime).split(',')[0]}</p>
-              <p className="text-sm font-semibold text-white">{formatTime(currentTime)}</p>
-            </div>
+          {/* Time and Date */}
+          <div className="ml-auto text-right z-10">
+            <p className="text-xl font-semibold text-white">{formatTime(currentTime)}</p>
+            <p className="text-xs text-gray-300">{formatDate(currentTime)}</p>
           </div>
         </div>
 
