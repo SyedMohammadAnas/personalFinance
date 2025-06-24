@@ -165,12 +165,12 @@ export default function AddTransactionModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogClose}>
-      <DialogContent className="max-w-sm w-[95vw] p-2 sm:max-w-lg md:max-w-xl bg-[#111827]/90 backdrop-blur-md border-gray-800">
+      <DialogContent className="max-w-sm w-[95vw] p-2 sm:max-w-lg md:max-w-xl bg-white/10 backdrop-blur-md border-gray-800">
         <DialogHeader className="pb-2 pt-3">
-          <DialogTitle className="text-2xl mb-1 pl-5">Add Transaction</DialogTitle>
+          <DialogTitle className="text-2xl mb-1 pl-5 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Add Transaction</DialogTitle>
         </DialogHeader>
 
-        <div className="p-4 mt-2 space-y-0 bg-[#0E1525] rounded-lg">
+        <div className="p-4 mt-2 space-y-0 bg-white/10 rounded-lg">
           <div className="flex flex-col gap-5">
             {/* Tag Dropdown and Amount - now in a flex row */}
             <div className="flex flex-row items-center gap-3 px-3 py-2 z-10 justify-between">
@@ -180,19 +180,19 @@ export default function AddTransactionModal({
                     <Button
                       variant="outline"
                       size="sm"
-                      className={`h-7 px-2.5 gap-1 border-gray-700 ${selectedTag ? 'text-white' : 'text-gray-400'} hover:bg-gray-800 bg-[#111827] shadow-sm`}
+                      className={`h-7 px-2.5 gap-1 border-gray-700 ${selectedTag ? 'text-white' : 'text-gray-400'} hover:bg-white/10 bg-white/10 shadow-sm`}
                     >
                       <Tag className="h-3.5 w-3.5" />
                       {selectedTag || 'Select tag'}
                       <ChevronsUpDown className="h-3.5 w-3.5 ml-1 opacity-50" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="bg-gray-900 border-gray-700 text-gray-200">
+                  <DropdownMenuContent align="start" className="bg-white/10 border-gray-700 text-gray-200">
                     {tagOptions.map((tag) => (
                       <DropdownMenuItem
                         key={tag}
                         onClick={() => setSelectedTag(tag)}
-                        className={`flex items-center cursor-pointer hover:bg-gray-800 ${selectedTag === tag ? 'text-blue-400' : ''}`}
+                        className={`flex items-center cursor-pointer hover:bg-white/10 ${selectedTag === tag ? 'text-blue-400' : ''}`}
                       >
                         {selectedTag === tag && <Check className="h-3.5 w-3.5 mr-2" />}
                         <span className={selectedTag === tag ? 'ml-0' : 'ml-5.5'}>
@@ -215,36 +215,36 @@ export default function AddTransactionModal({
             </div>
 
             {/* Transaction Name */}
-            <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
+                <div className="p-4 bg-white/10 rounded-md border border-gray-800">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-400">Name:</span>
+                <span className="text-sm font-medium text-gray-400 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Name:</span>
                 <Input
                   value={transactionName}
                   onChange={(e) => setTransactionName(e.target.value)}
                   placeholder="Transaction name"
-                  className="h-9 w-[240px] bg-[#1A2333] border-gray-700 text-gray-200"
+                  className="h-9 w-[240px] bg-white/10 border-gray-700 text-gray-200"
                 />
               </div>
             </div>
 
             {/* Transaction Amount */}
-            <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
+            <div className="p-4 bg-white/10 rounded-md border border-gray-800">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-400">Amount:</span>
+                <span className="text-sm font-medium text-gray-400 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Amount:</span>
                 <Input
                   type="number"
                   value={transactionAmount}
                   onChange={(e) => setTransactionAmount(e.target.value)}
                   placeholder="0.00"
-                  className="h-9 w-[240px] bg-[#1A2333] border-gray-700 text-gray-200"
+                  className="h-9 w-[240px] bg-white/10 border-gray-700 text-gray-200"
                 />
               </div>
             </div>
 
             {/* Transaction Type */}
-            <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
+            <div className="p-4 bg-white/10 rounded-md border border-gray-800">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-400">Type:</span>
+                <span className="text-sm font-medium text-gray-400 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Type:</span>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
                     <input
@@ -254,7 +254,7 @@ export default function AddTransactionModal({
                       value="debited"
                       checked={transactionType === 'debited'}
                       onChange={() => setTransactionType('debited')}
-                      className="h-4 w-4 accent-red-400 bg-gray-800"
+                      className="h-4 w-4 accent-red-400 bg-white/10"
                     />
                     <label htmlFor="debited" className="flex items-center text-sm text-gray-300">
                       <ArrowUpRight className="h-4 w-4 text-red-400 mr-1" />
@@ -270,7 +270,7 @@ export default function AddTransactionModal({
                       value="credited"
                       checked={transactionType === 'credited'}
                       onChange={() => setTransactionType('credited')}
-                      className="h-4 w-4 accent-green-400 bg-gray-800"
+                      className="h-4 w-4 accent-green-400 bg-white/10"
                     />
                     <label htmlFor="credited" className="flex items-center text-sm text-gray-300">
                       <ArrowDownLeft className="h-4 w-4 text-green-400 mr-1" />
@@ -282,17 +282,17 @@ export default function AddTransactionModal({
             </div>
 
             {/* Transaction Note */}
-            <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
+            <div className="p-4 bg-white/10 rounded-md border border-gray-800">
               <div className="flex flex-col">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-400">Note:</span>
+                  <span className="text-sm font-medium text-gray-400 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Note:</span>
                 </div>
                 <div className="relative w-full">
                   <textarea
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder="Add a note about this transaction (optional)"
-                    className="mt-2 w-full p-2 text-base rounded-md bg-gray-800 border border-gray-700 text-white"
+                    className="mt-2 w-full p-2 text-base rounded-md bg-white/10 border border-gray-700 text-gray-200"
                   />
                 </div>
               </div>
@@ -301,27 +301,27 @@ export default function AddTransactionModal({
             {/* Date and Time Group */}
             <div className="grid grid-cols-2 gap-4">
               {/* Date */}
-              <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
+              <div className="p-4 bg-white/10 rounded-md border border-gray-800">
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-gray-400 mb-1">Date:</span>
+                  <span className="text-sm font-medium text-gray-400 mb-1 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Date:</span>
                   <Input
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="h-9 bg-[#1A2333] border-gray-700 text-gray-200"
+                    className="h-9 bg-white/10 border-gray-700 text-gray-200"
                   />
                 </div>
               </div>
 
               {/* Time */}
-              <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
+              <div className="p-4 bg-white/10 rounded-md border border-gray-800">
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-gray-400 mb-1">Time:</span>
+                  <span className="text-sm font-medium text-gray-400 mb-1 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Time:</span>
                   <Input
                     type="time"
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
-                    className="h-9 bg-[#1A2333] border-gray-700 text-gray-200"
+                    className="h-9 bg-white/10 border-gray-700 text-gray-200"
                   />
                 </div>
               </div>
@@ -329,7 +329,7 @@ export default function AddTransactionModal({
           </div>
 
           {error && (
-            <div className="mt-4 p-3 bg-red-900/30 border border-red-800 rounded-md">
+            <div className="mt-4 p-3 bg-white/10 border border-red-800 rounded-md">
               <p className="text-sm text-red-400">{error}</p>
             </div>
           )}
@@ -342,7 +342,7 @@ export default function AddTransactionModal({
               type="button"
               onClick={handleReset}
               variant="outline"
-              className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white px-4 py-2"
+              className="border-gray-700 text-gray-300 hover:bg-white/10 hover:text-white px-4 py-2"
             >
               Reset
             </Button>
@@ -364,7 +364,7 @@ export default function AddTransactionModal({
               type="button"
               variant="outline"
               onClick={handleDialogClose}
-              className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white px-4 py-2"
+              className="border-gray-700 text-gray-300 hover:bg-white/10 hover:text-white px-4 py-2"
             >
               Close
             </Button>

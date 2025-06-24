@@ -261,12 +261,12 @@ export default function TransactionDetailsModal({
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogClose}>
       {/* Responsive modal: smaller on mobile, normal on desktop */}
-      <DialogContent className="max-w-sm w-[95vw] p-2 sm:max-w-lg md:max-w-xl bg-[#111827]/90 backdrop-blur-md border-gray-800">
+      <DialogContent className="max-w-sm w-[95vw] p-2 sm:max-w-lg md:max-w-xl bg-white/10 backdrop-blur-md border-gray-800">
         <DialogHeader className="pt-3 pb-1">
-          <DialogTitle className="flex items-start text-xl mb-1 pr-2 pl-5">Transaction Details</DialogTitle>
+          <DialogTitle className="flex items-start text-xl mb-1 pr-2 pl-5 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Transaction Details</DialogTitle>
         </DialogHeader>
 
-        <div className="p-4 mt-1 space-y-0 bg-[#0E1525] rounded-lg">
+        <div className="p-4 mt-1 space-y-0 bg-white/10 rounded-lg">
           <div className="flex flex-col gap-5">
             {/* Tag Dropdown and Amount - now in a flex row */}
             <div className="flex flex-row items-center gap-2 px-3 py-2 z-10 justify-between">
@@ -276,7 +276,7 @@ export default function TransactionDetailsModal({
                     <Button
                       variant="outline"
                       size="sm"
-                      className={`h-7 px-2.5 gap-1 border-gray-700 ${selectedTag ? 'text-white' : 'text-gray-400'} hover:bg-gray-800 bg-[#111827] shadow-sm`}
+                      className={`h-7 px-2.5 gap-1 border-gray-700 ${selectedTag ? 'text-white' : 'text-gray-400'} hover:bg-white/10 bg-white/10 shadow-sm`}
                       disabled={isTagUpdating}
                     >
                       {isTagUpdating ? (
@@ -288,12 +288,12 @@ export default function TransactionDetailsModal({
                       <ChevronsUpDown className="h-3.5 w-3.5 ml-1 opacity-50" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="bg-gray-900 border-gray-700 text-gray-200">
+                  <DropdownMenuContent align="start" className="bg-white/10 border-gray-700 text-gray-200">
                     {tagOptions.map((tag) => (
                       <DropdownMenuItem
                         key={tag}
                         onClick={() => handleTagSelect(tag)}
-                        className={`flex items-center cursor-pointer hover:bg-gray-800 ${selectedTag === tag ? 'text-blue-400' : ''}`}
+                        className={`flex items-center cursor-pointer hover:bg-white/10 ${selectedTag === tag ? 'text-blue-400' : ''}`}
                       >
                         {selectedTag === tag && <Check className="h-3.5 w-3.5 mr-2" />}
                         <span className={selectedTag === tag ? 'ml-0' : 'ml-5.5'}>
@@ -316,15 +316,15 @@ export default function TransactionDetailsModal({
             </div>
 
             {/* Transaction Name - Editable */}
-            <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
+            <div className="p-4 bg-white/10 rounded-md border border-gray-800">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-400">Name:</span>
+              <span className="text-sm font-medium text-gray-400 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Name:</span>
               {isEditing ? (
                 <div className="flex items-center gap-2">
                   <Input
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
-                      className="h-9 w-[240px] bg-gray-800 border-gray-700 text-gray-200"
+                      className="h-9 w-[240px] bg-white/10 border-gray-700 text-gray-200"
                   />
                   <Button
                     size="sm"
@@ -360,19 +360,19 @@ export default function TransactionDetailsModal({
           </div>
 
             {/* Transaction ID */}
-            <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
+            <div className="p-4 bg-white/10 rounded-md border border-gray-800">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-400">Transaction ID:</span>
+                <span className="text-sm font-medium text-gray-400 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Transaction ID:</span>
                 <span className="text-sm text-gray-300">{transaction.id.slice(0, 8)}...</span>
               </div>
             </div>
 
             {/* Transaction Type */}
-            <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
+            <div className="p-4 bg-white/10 rounded-md border border-gray-800">
             <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-400">Type:</span>
+                <span className="text-sm font-medium text-gray-400 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Type:</span>
                 <div className="flex items-center">
-                  <div className="w-7 h-7 rounded-full bg-gray-800 flex items-center justify-center mr-2">
+                  <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center mr-2">
                     {transaction.transaction_type === 'credited' ? (
                       <ArrowDownLeft className="h-4 w-4 text-green-400" />
                     ) : (
@@ -387,10 +387,10 @@ export default function TransactionDetailsModal({
             </div>
 
             {/* Transaction Note - Editable */}
-            <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
+            <div className="p-4 bg-white/10 rounded-md border border-gray-800">
               <div className="flex flex-col">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-400">Note:</span>
+                  <span className="text-sm font-medium text-gray-400 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Note:</span>
                   {isNoteEditing && (
                     <Button
                       size="sm"
@@ -415,7 +415,7 @@ export default function TransactionDetailsModal({
                     }}
                     onFocus={() => setIsNoteEditing(true)}
                     placeholder="Add a note about this transaction..."
-                    className="w-full min-h-[80px] rounded p-2 bg-[#1A2333] border border-gray-700 text-gray-200 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full min-h-[80px] rounded p-2 bg-white/10 border border-gray-700"
                   />
                 </div>
               </div>
@@ -424,17 +424,17 @@ export default function TransactionDetailsModal({
             {/* Date and Time Group */}
             <div className="grid grid-cols-2 gap-4">
               {/* Date */}
-              <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
+              <div className="p-4 bg-white/10 rounded-md border border-gray-800">
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-gray-400 mb-1">Date:</span>
+                  <span className="text-sm font-medium text-gray-400 mb-1 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Date:</span>
                   <span className="text-sm text-gray-300">{formatDate(transaction.date)}</span>
             </div>
           </div>
 
               {/* Time */}
-              <div className="p-4 bg-[#111827] rounded-md border border-gray-800">
+              <div className="p-4 bg-white/10 rounded-md border border-gray-800">
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-gray-400 mb-1">Time:</span>
+                  <span className="text-sm font-medium text-gray-400 mb-1 text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Time:</span>
               <span className="text-sm text-gray-300">{formatTime(transaction.time)}</span>
                 </div>
               </div>
@@ -442,7 +442,7 @@ export default function TransactionDetailsModal({
           </div>
 
           {error && (
-            <div className="mt-4 p-3 bg-red-900/30 border border-red-800 rounded-md">
+            <div className="mt-4 p-3 bg-white/10 border border-red-800 rounded-md">
               <p className="text-sm text-red-400">{error}</p>
             </div>
           )}
@@ -453,7 +453,7 @@ export default function TransactionDetailsModal({
             type="button"
             variant="outline"
             onClick={handleDialogClose}
-            className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white px-5 py-2"
+            className="border-gray-700 text-gray-300 hover:bg-white/10 hover:text-white px-5 py-2"
           >
             Close
           </Button>

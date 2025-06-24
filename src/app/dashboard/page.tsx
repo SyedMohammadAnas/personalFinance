@@ -397,7 +397,7 @@ export default function Dashboard() {
             <Button
               onClick={unlinkGoogleAuth}
               variant="destructive"
-              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
+              className="bg-red-800 hover:bg-red-700 w-full sm:w-auto border border-gray-900"
             >
               Unlink Google Account
             </Button>
@@ -405,7 +405,7 @@ export default function Dashboard() {
             {gmailLinked === true ? (
               <Button
                 disabled
-                className="w-full sm:w-auto bg-green-700 text-white cursor-not-allowed opacity-80"
+                className="w-full sm:w-auto bg-green-700 text-white cursor-not-allowed opacity-80 border border-gray-900"
               >
                 ✅ Gmail already linked
               </Button>
@@ -529,7 +529,7 @@ export default function Dashboard() {
 
             {/* Center - Dynamic title, absolutely centered */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-              <h1 className="text-2xl font-semibold text-white text-shadow-[0_1px_2px_rgba(0,0,0,0.)]">
+              <h1 className="text-2xl font-semibold text-white text-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                 {activeView === 'profile'
                   ? 'Profile'
                   : activeView === 'analytics'
@@ -650,8 +650,8 @@ export default function Dashboard() {
                         className={cn(
                           'flex items-center px-3 py-2 text-gray-400 transition-all hover:text-white rounded-lg',
                           activeView === item.view
-                            ? 'bg-gray-800 text-white'
-                            : 'hover:bg-gray-800'
+                            ? 'bg-white/20 text-white'
+                            : 'hover:bg-white/10'
                         )}
                         onClick={() => item.view && handleNavClick(item.view)}
                       >
