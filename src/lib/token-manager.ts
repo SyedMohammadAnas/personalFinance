@@ -229,51 +229,6 @@ export async function getValidAccessToken(userId: string): Promise<string | null
       .eq('user_id', userId)
       .limit(1);
 
-    if (error) {
-      console.error('Error retrieving token data with Supabase client:', error);
-
-      // Try direct REST API as fallback
-      try {
-        const response = await fetch(
-          `${supabaseUrl}/rest/v1/user_tokens?user_id=eq.${encodeURIComponent(userId)}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'apikey': supabaseAnonKey,
-              'Authorization': `Bearer ${supabaseAnonKey}`
-            }
-          }
-        );
-
-        if (!response.ok) {
-          console.error(`Error retrieving token: ${response.status} - ${await response.text()}`);
-          return null;
-        }
-
-        const tokens = await response.json();
-        if (Array.isArray(tokens) && tokens.length > 0) {
-          const userToken = tokens[0];
-
-          // Check if token is expired
-          const now = Date.now();
-          const isExpired = userToken.expiry_date && userToken.expiry_date < now;
-
-          if (!isExpired) {
-            return userToken.access_token;
-          }
-
-          // Handle token refresh
-          return await refreshToken(userId, userToken);
-        }
-
-        return null;
-      } catch (restError) {
-        console.error('Error with direct REST API call:', restError);
-        return null;
-      }
-    }
-
     if (!tokenData || tokenData.length === 0) {
       console.log('No token data found for user:', userId);
       return null;

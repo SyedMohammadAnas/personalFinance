@@ -3,7 +3,6 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,10 +11,9 @@ import { Label } from '@/components/ui/label';
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import TransactionList from '@/components/TransactionList';
-import GmailAuth from '@/components/GmailAuth';
-import { HomeIcon, LayoutDashboardIcon, UserIcon, BarChartIcon, Settings, Copy, Check, Shield, Mail, RefreshCcw } from 'lucide-react';
 import TransactionAnalytics from '@/components/TransactionAnalytics';
 import ProfileImage from '@/components/ProfileImage';
+import { HomeIcon, LayoutDashboardIcon, UserIcon, BarChartIcon, Settings, Copy, Check } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase client
@@ -142,7 +140,7 @@ export default function Dashboard() {
   const [latestDebited, setLatestDebited] = useState<Transaction | null>(null);
 
   // Function to fetch latest transactions for external calls (like refresh)
-  const fetchLatestTransactions = async () => {
+  const fetchLatestTransactions = useCallback(async () => {
     if (!session?.user?.email) return;
 
     try {
@@ -208,7 +206,7 @@ export default function Dashboard() {
       setLatestCredited(null);
       setLatestDebited(null);
     }
-  };
+  }, [session?.user?.email]);
 
   // Separate effect for time-related updates
   useEffect(() => {
