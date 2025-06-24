@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import TransactionList from '@/components/TransactionList';
 import TransactionAnalytics from '@/components/TransactionAnalytics';
 import ProfileImage from '@/components/ProfileImage';
-import { HomeIcon, LayoutDashboardIcon, UserIcon, BarChartIcon, Settings, Copy, Check } from 'lucide-react';
+import { HomeIcon, LayoutDashboardIcon, UserIcon, BarChartIcon, Settings, Copy, Check, Menu, X } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase client
@@ -138,6 +138,8 @@ export default function Dashboard() {
   const [isCopied, setIsCopied] = useState(false);
   const [latestCredited, setLatestCredited] = useState<Transaction | null>(null);
   const [latestDebited, setLatestDebited] = useState<Transaction | null>(null);
+  // State for mobile sidebar visibility
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Function to fetch latest transactions for external calls (like refresh)
   const fetchLatestTransactions = useCallback(async () => {
@@ -486,9 +488,19 @@ export default function Dashboard() {
     // Only handle special views that don't navigate to a new page
     if (view === 'home' || view === 'dashboard' || view === 'analytics' || view === 'profile' || view === 'settings') {
       setActiveView(view);
-      // Don't set pathname to anything here
+      // Close mobile sidebar when a navigation item is clicked
+      setIsMobileSidebarOpen(false);
     }
   };
+
+  // Navigation items array for reusability
+  const navigationItems = [
+    { name: 'Home', icon: HomeIcon, href: '/', view: null },
+    { name: 'Profile', icon: UserIcon, href: '#', view: 'profile' },
+    { name: 'Dashboard', icon: LayoutDashboardIcon, href: '#', view: 'dashboard' },
+    { name: 'Analytics', icon: BarChartIcon, href: '#', view: 'analytics' },
+    { name: 'Settings', icon: Settings, href: '#', view: 'settings' },
+  ];
 
   return (
     <div
@@ -502,12 +514,110 @@ export default function Dashboard() {
       }}
     >
       <div className="absolute inset-0 backdrop-blur-none bg-[#0A0F1A]/15"></div>
-      <div className="container mx-auto py-8 px-4 relative z-10">
+
+      {/* Mobile Top Bar - Only visible on small screens */}
+      <div className="md:hidden relative z-50">
+        <div className="bg-[#0F172A]/90 backdrop-blur-sm border-b border-gray-800 px-4 py-3">
+          <div className="flex items-center justify-between">
+            {/* Left side - Hamburger menu */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-gray-800 p-2"
+              onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+            >
+              {isMobileSidebarOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </Button>
+
+            {/* Center - Profile info */}
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={session?.user?.image || ''} alt={session?.user?.name || 'User'} />
+                <AvatarFallback className="bg-gray-700 text-sm">{session?.user?.name?.charAt(0) || 'U'}</AvatarFallback>
+              </Avatar>
+              <div className="text-center">
+                <p className="text-sm font-medium text-white truncate max-w-24">{session?.user?.name}</p>
+              </div>
+            </div>
+
+            {/* Right side - Time and Date */}
+            <div className="text-right">
+              <p className="text-xs text-gray-300">{formatDate(currentTime).split(',')[0]}</p>
+              <p className="text-sm font-semibold text-white">{formatTime(currentTime)}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Sidebar Overlay */}
+        {isMobileSidebarOpen && (
+          <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setIsMobileSidebarOpen(false)} />
+        )}
+
+        {/* Mobile Sidebar */}
+        <div className={cn(
+          "fixed left-0 top-0 h-full w-64 bg-[#0F172A]/95 backdrop-blur-sm border-r border-gray-800 z-50 transform transition-transform duration-300 ease-in-out",
+          isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        )}>
+          <div className="p-6">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-lg font-semibold text-white">Menu</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white hover:bg-gray-800 p-1"
+                onClick={() => setIsMobileSidebarOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* User info section for mobile sidebar */}
+            <div className="flex flex-col items-center gap-3 border-b border-gray-800 pb-6 mb-6">
+              <Avatar className="h-16 w-16">
+                <AvatarImage src={session?.user?.image || ''} alt={session?.user?.name || 'User'} />
+                <AvatarFallback className="bg-gray-700 text-lg">{session?.user?.name?.charAt(0) || 'U'}</AvatarFallback>
+              </Avatar>
+              <div className="text-center">
+                <p className="text-lg font-medium text-white">{session?.user?.name}</p>
+                <p className="text-sm text-gray-400">{session?.user?.email}</p>
+              </div>
+            </div>
+
+            {/* Navigation Links */}
+            <nav className="space-y-2">
+              {navigationItems.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.view ? '#' : item.href}
+                  className={cn(
+                    'flex items-center px-3 py-3 text-gray-400 transition-all hover:text-white rounded-lg w-full',
+                    activeView === item.view
+                      ? 'bg-gray-800 text-white'
+                      : 'hover:bg-gray-800'
+                  )}
+                  onClick={() => item.view && handleNavClick(item.view)}
+                >
+                  <item.icon className="h-5 w-5 mr-3" />
+                  <span className="text-base">{item.name}</span>
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Container - Adjusted for mobile */}
+      <div className="container mx-auto py-4 md:py-8 px-4 relative z-10 mt-0 md:mt-0">
         <Card className="border border-gray-800 bg-[#0F172A]/80 shadow-md text-white backdrop-blur-none">
           <CardContent className="p-0">
             <div className="flex flex-col md:flex-row">
-              {/* Sidebar */}
-              <div className="w-full md:w-64 border-r border-gray-800 p-6 bg-[#0F172A]/20 backdrop-blur-none">
+              {/* Desktop Sidebar - Hidden on mobile */}
+              <div className="hidden md:block w-64 border-r border-gray-800 p-6 bg-[#0F172A]/20 backdrop-blur-none">
                 {/* User info */}
                 <div className="flex flex-col items-center gap-3 border-b border-gray-800 pb-6">
                   <Avatar className="h-16 w-16">
@@ -528,13 +638,7 @@ export default function Dashboard() {
                 {/* Navigation Links - centered with flex */}
                 <div className="mt-8 flex flex-col items-center">
                   <nav className="space-y-3 w-full">
-                    {[
-                      { name: 'Home', icon: HomeIcon, href: '/', view: null },
-                      { name: 'Profile', icon: UserIcon, href: '#', view: 'profile' },
-                      { name: 'Dashboard', icon: LayoutDashboardIcon, href: '#', view: 'dashboard' },
-                      { name: 'Analytics', icon: BarChartIcon, href: '#', view: 'analytics' },
-                      { name: 'Settings', icon: Settings, href: '#', view: 'settings' },
-                    ].map((item) => (
+                    {navigationItems.map((item) => (
                       <Link
                         key={item.name}
                         href={item.view ? '#' : item.href}
@@ -554,12 +658,12 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Main Content */}
-              <div className="flex-1 p-6 border-l border-gray-800 backdrop-blur-none bg-[#0F172A]/20">
+              {/* Main Content - Adjusted padding for mobile */}
+              <div className="flex-1 p-4 md:p-6 md:border-l border-gray-800 backdrop-blur-none bg-[#0F172A]/20">
                 {/* Dashboard View */}
                 {activeView === 'dashboard' && (
                   <>
-                    <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+                    <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2">
                       {/* Latest Credited Transaction Card */}
                       <LatestTransactionCard
                         transaction={latestCredited}
@@ -573,7 +677,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* Add the onTransactionsUpdated prop to TransactionList */}
-                    <div className="mt-6">
+                    <div className="mt-4 md:mt-6">
                       <TransactionList onTransactionsUpdated={fetchLatestTransactions} />
                     </div>
                   </>
@@ -582,8 +686,8 @@ export default function Dashboard() {
                 {/* Analytics View */}
                 {activeView === 'analytics' && (
                   <div>
-                    <div className="mb-6">
-                      <h2 className="text-2xl font-bold text-white">Financial Analytics</h2>
+                    <div className="mb-4 md:mb-6">
+                      <h2 className="text-xl md:text-2xl font-bold text-white">Financial Analytics</h2>
                       <p className="text-gray-400">View your transaction analytics and insights</p>
                     </div>
                     <TransactionAnalytics />
@@ -593,12 +697,12 @@ export default function Dashboard() {
                 {/* Profile View */}
                 {activeView === 'profile' && (
                   <div>
-                    <div className="mb-6">
-                      <h2 className="text-2xl font-bold text-white">User Profile</h2>
+                    <div className="mb-4 md:mb-6">
+                      <h2 className="text-xl md:text-2xl font-bold text-white">User Profile</h2>
                       <p className="text-gray-400">Your account details and preferences</p>
                     </div>
 
-                    <div className="grid gap-8">
+                    <div className="grid gap-6 md:gap-8">
                       {/* Personal Information Card */}
                       <Card className="bg-[#111827] border border-gray-800">
                         <CardHeader>
@@ -617,7 +721,7 @@ export default function Dashboard() {
                             </div>
 
                             {/* User details */}
-                            <div className="space-y-4 flex-grow">
+                            <div className="space-y-4 flex-grow w-full">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                   <label className="text-sm text-gray-400">Full Name</label>
@@ -626,20 +730,20 @@ export default function Dashboard() {
 
                                 <div>
                                   <label className="text-sm text-gray-400">Email Address</label>
-                                  <p className="text-white font-medium">{session?.user?.email}</p>
+                                  <p className="text-white font-medium break-all">{session?.user?.email}</p>
                                 </div>
                               </div>
 
                               <div>
                                 <label className="text-sm text-gray-400">User ID</label>
                                 <div className="flex items-center space-x-2 mt-1">
-                                  <code className="bg-gray-800 px-2 py-1 rounded text-xs text-gray-300 w-56 truncate">
+                                  <code className="bg-gray-800 px-2 py-1 rounded text-xs text-gray-300 flex-1 truncate">
                                     {session?.user?.id || 'No ID available'}
                                   </code>
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="h-8 px-2 border-gray-700 bg-gray-800 hover:bg-gray-700"
+                                    className="h-8 px-2 border-gray-700 bg-gray-800 hover:bg-gray-700 flex-shrink-0"
                                     onClick={copyToClipboard}
                                   >
                                     {isCopied ? (
@@ -661,12 +765,12 @@ export default function Dashboard() {
                 {/* Settings View */}
                 {activeView === 'settings' && (
                   <div>
-                    <div className="mb-6">
-                      <h2 className="text-2xl font-bold text-white">Account Settings</h2>
+                    <div className="mb-4 md:mb-6">
+                      <h2 className="text-xl md:text-2xl font-bold text-white">Account Settings</h2>
                       <p className="text-gray-400">Manage your account preferences and connections</p>
                     </div>
 
-                    <div className="grid gap-8">
+                    <div className="grid gap-6 md:gap-8">
                       {renderAccountSettings()}
                     </div>
                   </div>
