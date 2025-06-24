@@ -53,7 +53,7 @@ export async function storeTokens(
       try {
         await supabase.rpc('create_tokens_table_if_not_exists');
       } catch (error) {
-        console.log('RPC create_tokens_table_if_not_exists not available, continuing...');
+        console.log('RPC create_tokens_table_if_not_exists not available, continuing...', error);
       }
 
       // Check if a record already exists for this user
