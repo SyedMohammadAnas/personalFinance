@@ -5,6 +5,8 @@
  * to store the access and refresh tokens for a user.
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { OAuth2Client } from 'google-auth-library';
