@@ -1,11 +1,11 @@
+export const dynamic = "force-dynamic";
+
 /**
  * Google OAuth Token Handler
  *
  * This endpoint handles the callback from Google OAuth authorization
  * to store the access and refresh tokens for a user.
  */
-
-export const dynamic = "force-dynamic";
 
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
