@@ -112,10 +112,11 @@ export async function fetchEmails(
     }
     console.log(`[GMAIL] Successfully processed ${emails.length} HDFC bank email(s)`);
     return emails;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[GMAIL] Error fetching emails:', error);
-    if (error.response && error.response.data) {
-      console.error('[GMAIL] API error response data:', error.response.data);
+    if (typeof error === 'object' && error !== null && 'response' in error && (error as any).response?.data) {
+      // TypeScript-safe check for error.response.data
+      console.error('[GMAIL] API error response data:', (error as { response?: { data?: unknown } }).response?.data);
     }
     return [];
   }
