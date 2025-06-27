@@ -306,7 +306,29 @@ export async function ensureUserTransactionTable(userEmail: string): Promise<boo
   try {
     // Get Supabase client
     const supabase = getSupabaseClient();
-    // Use the SQL function to create the table
+
+    // Sanitize email to create the expected table name
+    const safeEmail = userEmail.toLowerCase().replace(/[@.]/g, '_');
+    const tableName = `transactions_${safeEmail}`;
+
+    // 1. Check if the table already exists in the database
+    // Supabase exposes a special table called 'pg_tables' in the 'pg_catalog' schema
+    const { data: tables, error: tableCheckError } = await supabase
+      .from('pg_tables')
+      .select('tablename')
+      .eq('tablename', tableName)
+      .limit(1);
+
+    if (tableCheckError) {
+      console.error(`Error checking if table ${tableName} exists:`, tableCheckError);
+      // If we can't check, fail safe and try to create
+    } else if (tables && tables.length > 0) {
+      // Table already exists, no need to create
+      console.log(`Transaction table ${tableName} already exists for user ${userEmail}`);
+      return true;
+    }
+
+    // 2. Table does not exist, so call the function to create it
     try {
       const { error } = await supabase.rpc('create_user_transaction_table', {
         user_email: userEmail
@@ -314,6 +336,7 @@ export async function ensureUserTransactionTable(userEmail: string): Promise<boo
       if (error) {
         throw error;
       }
+      console.log(`Created transaction table ${tableName} for user ${userEmail}`);
     } catch (error: unknown) {
       // Use type guard to safely access error.message
       const msg = isErrorWithMessage(error)
