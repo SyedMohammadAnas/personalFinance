@@ -8,6 +8,8 @@
  * 3. Stores the transaction data in the user's transaction table
  */
 
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
