@@ -304,28 +304,34 @@ export async function storeTransactionData(
 // Ensure the user's transaction table exists
 export async function ensureUserTransactionTable(userEmail: string): Promise<boolean> {
   try {
-    // Get Supabase client
     const supabase = getSupabaseClient();
-
-    // Sanitize email to create the expected table name
     const safeEmail = userEmail.toLowerCase().replace(/[@.]/g, '_');
     const tableName = `transactions_${safeEmail}`;
 
-    // 1. Check if the table already exists in the database
-    // Supabase exposes a special table called 'pg_tables' in the 'pg_catalog' schema
-    const { data: tables, error: tableCheckError } = await supabase
-      .from('pg_tables')
-      .select('tablename')
-      .eq('tablename', tableName)
-      .limit(1);
-
-    if (tableCheckError) {
-      console.error(`Error checking if table ${tableName} exists:`, tableCheckError);
-      // If we can't check, fail safe and try to create
-    } else if (tables && tables.length > 0) {
-      // Table already exists, no need to create
-      console.log(`Transaction table ${tableName} already exists for user ${userEmail}`);
-      return true;
+    // 1. Try to select from the user's transaction table to check if it exists
+    let tableExists = false;
+    try {
+      // Try a simple select; if the table does not exist, Supabase/Postgres will throw an error
+      const { error: selectError } = await supabase
+        .from(tableName)
+        .select('id')
+        .limit(1);
+      if (!selectError) {
+        // No error means table exists
+        tableExists = true;
+        console.log(`Transaction table ${tableName} already exists for user ${userEmail}`);
+        return true;
+      } else if (selectError.code === '42P01') {
+        // Table does not exist
+        tableExists = false;
+      } else {
+        // Some other error
+        console.error(`Error checking if table ${tableName} exists:`, selectError);
+        // Fail safe: try to create the table
+      }
+    } catch (err) {
+      // Defensive: if anything unexpected happens, try to create the table
+      console.error(`Unexpected error checking table existence for ${tableName}:`, err);
     }
 
     // 2. Table does not exist, so call the function to create it
@@ -338,11 +344,9 @@ export async function ensureUserTransactionTable(userEmail: string): Promise<boo
       }
       console.log(`Created transaction table ${tableName} for user ${userEmail}`);
     } catch (error: unknown) {
-      // Use type guard to safely access error.message
       const msg = isErrorWithMessage(error)
         ? error.message
         : String(error);
-      // If error is about table/function already existing, ignore it
       if (
         msg.includes('already exists') ||
         msg.includes('could not find the function') ||
