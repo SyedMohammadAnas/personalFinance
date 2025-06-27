@@ -114,9 +114,8 @@ export async function fetchEmails(
     return emails;
   } catch (error: unknown) {
     console.error('[GMAIL] Error fetching emails:', error);
-    if (typeof error === 'object' && error !== null && 'response' in error && (error as any).response?.data) {
-      // TypeScript-safe check for error.response.data
-      console.error('[GMAIL] API error response data:', (error as { response?: { data?: unknown } }).response?.data);
+    if (isErrorWithResponseData(error)) {
+      console.error('[GMAIL] API error response data:', error.response.data);
     }
     return [];
   }
@@ -265,4 +264,16 @@ async function getEmailDetails(gmailClient: gmail_v1.Gmail, messageId: string): 
     console.error(`Error getting email details for ${messageId}:`, error);
     return null;
   }
+}
+
+// Type guard for error with response.data
+function isErrorWithResponseData(error: unknown): error is { response: { data: unknown } } {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'response' in error &&
+    typeof (error as { response?: unknown }).response === 'object' &&
+    (error as { response?: { data?: unknown } }).response !== null &&
+    'data' in (error as { response: { data?: unknown } }).response
+  );
 }
