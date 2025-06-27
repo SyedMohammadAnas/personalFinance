@@ -309,7 +309,6 @@ export async function ensureUserTransactionTable(userEmail: string): Promise<boo
     const tableName = `transactions_${safeEmail}`;
 
     // 1. Try to select from the user's transaction table to check if it exists
-    let tableExists = false;
     try {
       // Try a simple select; if the table does not exist, Supabase/Postgres will throw an error
       const { error: selectError } = await supabase
@@ -318,12 +317,11 @@ export async function ensureUserTransactionTable(userEmail: string): Promise<boo
         .limit(1);
       if (!selectError) {
         // No error means table exists
-        tableExists = true;
         console.log(`Transaction table ${tableName} already exists for user ${userEmail}`);
         return true;
       } else if (selectError.code === '42P01') {
         // Table does not exist
-        tableExists = false;
+        // Will proceed to create the table below
       } else {
         // Some other error
         console.error(`Error checking if table ${tableName} exists:`, selectError);
