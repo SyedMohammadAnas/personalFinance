@@ -105,7 +105,7 @@ export async function fetchEmails(
         }
       } catch (error) {
         console.error(`[GMAIL] Error fetching email ${message.id}:`, error);
-        if (error.response && error.response.data) {
+        if (isErrorWithResponseData(error)) {
           console.error('[GMAIL] API error response data:', error.response.data);
         }
       }
