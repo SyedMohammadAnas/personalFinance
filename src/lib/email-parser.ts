@@ -21,6 +21,12 @@ export interface TransactionData {
 // Function to parse a bank email and extract transaction details
 export async function parseEmailContent(email: EmailData): Promise<TransactionData | null> {
   try {
+    console.log('[EMAIL PARSER] Parsing email:', {
+      id: email.id,
+      from: email.from,
+      subject: email.subject,
+      date: email.date
+    });
     // Basic validation
     if (!email || !email.id || !email.rawContent) {
       console.error('Invalid email data provided for parsing');
@@ -219,7 +225,7 @@ export async function parseEmailContent(email: EmailData): Promise<TransactionDa
       return null;
     }
 
-    return {
+    const parsedResult = {
       emailId: email.id,
       amount,
       name,
@@ -227,8 +233,10 @@ export async function parseEmailContent(email: EmailData): Promise<TransactionDa
       time: timeStr,
       transactionType
     };
+    console.log('[EMAIL PARSER] Parsed transaction data:', parsedResult);
+    return parsedResult;
   } catch (error) {
-    console.error('Error parsing email content:', error);
+    console.error('[EMAIL PARSER] Error parsing email content:', error);
     return null;
   }
 }
@@ -240,6 +248,11 @@ export async function storeTransactionData(
   transaction: TransactionData
 ): Promise<boolean> {
   try {
+    console.log('[EMAIL PARSER] Storing transaction data:', {
+      userId,
+      userEmail,
+      transaction
+    });
     // Get the table name for this user
     const safeEmail = userEmail.toLowerCase().replace(/[@.]/g, '_');
     const tableName = `transactions_${safeEmail}`;
@@ -285,18 +298,18 @@ export async function storeTransactionData(
     if (error) {
       // If the error is about duplicate email_id, this is likely a duplicate transaction
       if (error.code === '23505') { // PostgreSQL unique violation code
-        console.log(`Transaction for email ${transaction.emailId} already exists. Skipping.`);
+        console.log(`[EMAIL PARSER] Transaction for email ${transaction.emailId} already exists. Skipping.`);
         return true; // Not an actual error for our purposes
       }
 
-      console.error(`Error storing transaction for user ${userEmail}:`, error);
+      console.error(`[EMAIL PARSER] Error storing transaction for user ${userEmail}:`, error);
       return false;
     }
 
-    console.log(`Stored transaction for user ${userEmail} with email ID ${transaction.emailId}`);
+    console.log(`[EMAIL PARSER] Stored transaction for user ${userEmail} with email ID ${transaction.emailId}`);
     return true;
   } catch (error) {
-    console.error(`Error in storeTransactionData for ${userEmail}:`, error);
+    console.error(`[EMAIL PARSER] Error in storeTransactionData for ${userEmail}:`, error);
     return false;
   }
 }

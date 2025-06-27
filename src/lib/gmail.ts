@@ -35,8 +35,13 @@ interface GmailPart {
 
 /**
  * Creates a Gmail API client using OAuth2 credentials
+ * Adds logging for the token used.
  */
 export async function createGmailClient(accessToken: string): Promise<gmail_v1.Gmail> {
+  // Mask the token for logs
+  const maskedToken = accessToken ? accessToken.slice(0, 6) + '...' + accessToken.slice(-4) : 'NO TOKEN';
+  console.log(`[GMAIL] Using access token: ${maskedToken}`);
+
   // Create OAuth2 client
   const oAuth2Client = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID,
@@ -55,6 +60,7 @@ export async function createGmailClient(accessToken: string): Promise<gmail_v1.G
 /**
  * Retrieves a list of emails from the user's Gmail account
  * Focuses specifically on bank emails
+ * Adds detailed logging of the API request and response.
  */
 export async function fetchEmails(
   gmailClient: gmail_v1.Gmail,
@@ -62,20 +68,27 @@ export async function fetchEmails(
   query: string = 'from:hdfc OR from:hdfcbank OR subject:hdfc OR subject:transaction OR subject:payment'
 ): Promise<EmailData[]> {
   try {
-    console.log(`Fetching emails with query: ${query}, max results: ${maxResults}`);
-
+    console.log(`[GMAIL] Fetching emails with query: ${query}, max results: ${maxResults}`);
+    // Log the actual API request
+    console.log(`[GMAIL] Making API request: users.messages.list, userId: 'me', maxResults: ${maxResults}`);
     // List messages matching the query
     const response = await gmailClient.users.messages.list({
       userId: 'me',
       maxResults: maxResults,
       q: query
     });
-
+    // Log the raw response (limit output for large responses)
+    if (response && response.data) {
+      console.log(`[GMAIL] API response:`, {
+        resultSizeEstimate: response.data.resultSizeEstimate,
+        messages: response.data.messages ? response.data.messages.slice(0, 3) : [],
+      });
+    } else {
+      console.log('[GMAIL] No data in API response');
+    }
     const messages = response.data.messages || [];
-    console.log(`Found ${messages.length} email(s) matching the query`);
-
+    console.log(`[GMAIL] Found ${messages.length} email(s) matching the query`);
     const emails: EmailData[] = [];
-
     // Fetch full details for each message
     for (const message of messages) {
       try {
@@ -85,20 +98,25 @@ export async function fetchEmails(
           // Check if this is a bank email - more specific filtering
           if (isHdfcBankEmail(emailData)) {
             emails.push(emailData);
-            console.log(`Added email with subject: "${emailData.subject}" from ${emailData.from}`);
+            console.log(`[GMAIL] Added email with subject: "${emailData.subject}" from ${emailData.from}`);
           } else {
-            console.log(`Skipped non-bank email: "${emailData.subject}"`);
+            console.log(`[GMAIL] Skipped non-bank email: "${emailData.subject}"`);
           }
         }
       } catch (error) {
-        console.error(`Error fetching email ${message.id}:`, error);
+        console.error(`[GMAIL] Error fetching email ${message.id}:`, error);
+        if (error.response && error.response.data) {
+          console.error('[GMAIL] API error response data:', error.response.data);
+        }
       }
     }
-
-    console.log(`Successfully processed ${emails.length} HDFC bank email(s)`);
+    console.log(`[GMAIL] Successfully processed ${emails.length} HDFC bank email(s)`);
     return emails;
-  } catch (error) {
-    console.error('Error fetching emails:', error);
+  } catch (error: any) {
+    console.error('[GMAIL] Error fetching emails:', error);
+    if (error.response && error.response.data) {
+      console.error('[GMAIL] API error response data:', error.response.data);
+    }
     return [];
   }
 }

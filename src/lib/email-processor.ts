@@ -19,6 +19,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
  */
 export async function ensureUserEmailTable(userEmail: string): Promise<boolean> {
   try {
+    console.log('[EMAIL PROCESSOR] Ensuring user email table for:', userEmail);
     // Sanitize email to create a valid table name
     const tableName = getTableNameFromEmail(userEmail);
 
@@ -33,7 +34,7 @@ export async function ensureUserEmailTable(userEmail: string): Promise<boolean> 
       .limit(1);
 
     if (error) {
-      console.error(`Error checking if table ${tableName} exists:`, error);
+      console.error(`[EMAIL PROCESSOR] Error checking if table ${tableName} exists:`, error);
     }
 
     // If table doesn't exist, create it
@@ -65,16 +66,16 @@ export async function ensureUserEmailTable(userEmail: string): Promise<boolean> 
       });
 
       if (!res.ok) {
-        console.error(`Failed to create table ${tableName}:`, await res.text());
+        console.error(`[EMAIL PROCESSOR] Failed to create table ${tableName}:`, await res.text());
         return false;
       }
 
-      console.log(`Created table ${tableName} for user ${userEmail}`);
+      console.log(`[EMAIL PROCESSOR] Created table ${tableName} for user ${userEmail}`);
     }
 
     return true;
   } catch (error) {
-    console.error(`Error ensuring user email table for ${userEmail}:`, error);
+    console.error(`[EMAIL PROCESSOR] Error ensuring user email table for ${userEmail}:`, error);
     return false;
   }
 }
@@ -84,6 +85,7 @@ export async function ensureUserEmailTable(userEmail: string): Promise<boolean> 
  */
 export async function storeEmailData(userEmail: string, emails: EmailData[]): Promise<boolean> {
   try {
+    console.log('[EMAIL PROCESSOR] Storing emails for user:', userEmail, 'Number of emails:', emails.length);
     // Ensure the user's table exists
     const tableExists = await ensureUserEmailTable(userEmail);
     if (!tableExists) {
@@ -99,6 +101,12 @@ export async function storeEmailData(userEmail: string, emails: EmailData[]): Pr
 
     // Process each email
     for (const email of emails) {
+      console.log('[EMAIL PROCESSOR] Processing email:', {
+        id: email.id,
+        from: email.from,
+        subject: email.subject,
+        date: email.date
+      });
       // Check if this email already exists in the table
       const { data: existingEmail } = await supabase
         .from(tableName)
@@ -107,7 +115,7 @@ export async function storeEmailData(userEmail: string, emails: EmailData[]): Pr
         .limit(1);
 
       if (existingEmail && existingEmail.length > 0) {
-        console.log(`Email ${email.id} already exists for user ${userEmail}`);
+        console.log(`[EMAIL PROCESSOR] Email ${email.id} already exists for user ${userEmail}`);
         continue; // Skip this email
       }
 
@@ -126,15 +134,15 @@ export async function storeEmailData(userEmail: string, emails: EmailData[]): Pr
         });
 
       if (error) {
-        console.error(`Error storing email ${email.id} for user ${userEmail}:`, error);
+        console.error(`[EMAIL PROCESSOR] Error storing email ${email.id} for user ${userEmail}:`, error);
       } else {
-        console.log(`Stored email ${email.id} for user ${userEmail}`);
+        console.log(`[EMAIL PROCESSOR] Stored email ${email.id} for user ${userEmail}`);
       }
     }
 
     return true;
   } catch (error) {
-    console.error(`Error storing emails for ${userEmail}:`, error);
+    console.error(`[EMAIL PROCESSOR] Error storing emails for ${userEmail}:`, error);
     return false;
   }
 }

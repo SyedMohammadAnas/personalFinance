@@ -16,18 +16,19 @@ export const revalidate = 0;
  */
 export async function GET(request: Request) {
   try {
+    console.log('[CRON] /api/cron/process-emails - Incoming request');
     // Simple authorization check using a secret key
     const authHeader = request.headers.get('authorization');
     const expectedSecret = `Bearer ${process.env.CRON_SECRET_KEY}`;
-
     if (!authHeader || authHeader !== expectedSecret) {
+      console.warn('[CRON] /api/cron/process-emails - Unauthorized request');
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
-
     // Call the email processing API internally
+    console.log('[CRON] /api/cron/process-emails - Triggering /api/emails/process');
     const response = await fetch(new URL('/api/emails/process', request.url), {
       method: 'POST',
       headers: {
@@ -36,25 +37,23 @@ export async function GET(request: Request) {
       },
       body: JSON.stringify({})
     });
-
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Error processing emails:', errorData);
+      console.error('[CRON] /api/cron/process-emails - Error processing emails:', errorData);
       return NextResponse.json(
         { error: 'Failed to process emails', details: errorData },
         { status: response.status }
       );
     }
-
     const result = await response.json();
-
+    console.log('[CRON] /api/cron/process-emails - Email processing completed. Result:', result);
     return NextResponse.json({
       success: true,
       message: 'Email processing completed',
       details: result
     });
   } catch (error) {
-    console.error('Error in cron job handler:', error);
+    console.error('[CRON] /api/cron/process-emails - Error in cron job handler:', error);
     return NextResponse.json(
       {
         error: 'Internal server error',
